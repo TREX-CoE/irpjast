@@ -1,0 +1,3 @@
+* IRPJAST
+
+CHAMP's Jastrow factor computation using the IRPF90 method
