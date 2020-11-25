@@ -56,4 +56,6 @@ BEGIN_PROVIDER [double precision, factor_en]
             / (1 + aord_vect(2) * rescale_en(i, j)) + pow_ser
     end do
  end do
+
+ factor_en = 0.5d0 * factor_en
 END_PROVIDER

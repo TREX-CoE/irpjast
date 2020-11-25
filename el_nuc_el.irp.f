@@ -29,4 +29,6 @@ BEGIN_PROVIDER [double precision, factor_een]
     end do
  end do
 
+ factor_een = 0.5d0 * factor_een
+
 END_PROVIDER
