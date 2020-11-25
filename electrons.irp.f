@@ -43,6 +43,10 @@ BEGIN_PROVIDER [double precision, factor_ee]
  BEGIN_DOC
  ! Electron-electron contribution to Jastrow factor
  END_DOC
+ integer :: i, j
+ double precision :: pow_ser = 0.0d0
+ factor_ee = 0.0d0
+
  do j = 1 , nelec
     do i = 1, nelec
        do p = 2, nbord

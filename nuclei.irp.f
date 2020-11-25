@@ -44,7 +44,9 @@ BEGIN_PROVIDER [double precision, factor_en]
  ! Electron-nuclei contribution to Jastrow factor
  END_DOC
  integer :: i, j, p
- double precision :: pow_ser
+ double precision :: pow_ser = 0.0d0
+ factor_en = 0.0d0
+
  do j = 1 , nnuc
     do i = 1, nnuc
        do p = 2, naord

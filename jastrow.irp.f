@@ -1,8 +1,6 @@
 program jastrow
   implicit none
-  print *, elec_coord
-  print *, ''
-  print *, elec_dist
-  print *, ''
-  print *, rescale_ee
+  print *, 'The total Jastrow factor'
+  print *, dexp(factor_ee + factor_en + factor_een)
+
 end program

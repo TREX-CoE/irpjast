@@ -45,7 +45,7 @@ END_PROVIDER
 BEGIN_PROVIDER [double precision, cord_vect, (ncord)]
  implicit none
  BEGIN_DOC
- ! Vector of the `b' coefficients
+ ! Vector of the `c' coefficients
  END_DOC
  do i = 1, ncord 
     call random_number(cord_vect)

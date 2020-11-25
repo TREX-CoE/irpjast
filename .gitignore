@@ -3,3 +3,4 @@ IRPF90_man/
 irpf90.make
 irpf90_entities
 tags
+*.mod
