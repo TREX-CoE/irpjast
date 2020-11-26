@@ -3,7 +3,7 @@ BEGIN_PROVIDER [ integer, nnuc ]
  BEGIN_DOC
  ! Number of nuclei
  END_DOC
- nnuc = 2
+ nnuc = 10
 END_PROVIDER
 
 
@@ -21,7 +21,7 @@ BEGIN_PROVIDER [ double precision, nuc_coord, (nnuc, 3) ]
 
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, elnuc_dist, (nnuc, nnuc) ]
+BEGIN_PROVIDER [ double precision, elnuc_dist, (nelec, nnuc) ]
  implicit none
  BEGIN_DOC
  ! e-n distance
@@ -50,7 +50,7 @@ BEGIN_PROVIDER [double precision, factor_en]
  do j = 1 , nnuc
     do i = 1, nnuc
        do p = 2, naord
-          pow_ser = pow_ser + aord_vect(p + 1) * rescale_en(i, j) ** p
+          pow_ser = pow_ser + aord_vect(p) * rescale_en(i, j) ** p
        end do
        factor_en = factor_en + aord_vect(1) * rescale_en(i, j) &
             / (1 + aord_vect(2) * rescale_en(i, j)) + pow_ser

@@ -40,7 +40,7 @@ BEGIN_PROVIDER [ double precision, rescale_en, (nelec, nnuc) ]
  enddo
 END_PROVIDER
 
-BEGIN_PROVIDER [double precision, rescale_een_e, (nelec, 3)]
+BEGIN_PROVIDER [double precision, rescale_een_e, (nelec, nelec)]
  implicit none
  BEGIN_DOC
  ! R = exp(-kappa r) for electron-electron for $J_{een}$
@@ -53,7 +53,7 @@ BEGIN_PROVIDER [double precision, rescale_een_e, (nelec, 3)]
  enddo
 END_PROVIDER
 
-BEGIN_PROVIDER [double precision, rescale_een_n, (nnuc, 3)]
+BEGIN_PROVIDER [double precision, rescale_een_n, (nelec, nnuc)]
  implicit none
  BEGIN_DOC
  ! R = exp(-kappa r) for electron-electron for $J_{een}$

@@ -3,7 +3,7 @@ BEGIN_PROVIDER [ integer, nelec ]
  BEGIN_DOC
  ! Number of electrons
  END_DOC
- nelec = 2
+ nelec = 100
 END_PROVIDER
 
 
@@ -43,14 +43,14 @@ BEGIN_PROVIDER [double precision, factor_ee]
  BEGIN_DOC
  ! Electron-electron contribution to Jastrow factor
  END_DOC
- integer :: i, j
+ integer :: i, j, p
  double precision :: pow_ser = 0.0d0
  factor_ee = 0.0d0
 
  do j = 1 , nelec
     do i = 1, nelec
        do p = 2, nbord
-          pow_ser = pow_ser + bord_vect(p + 1) * rescale_ee(i, j) ** p
+          pow_ser = pow_ser + bord_vect(p) * rescale_ee(i, j) ** p
        end do
        factor_ee = factor_ee + bord_vect(1) * rescale_ee(i, j) &
             / (1 + bord_vect(2) * rescale_ee(i, j)) + pow_ser
