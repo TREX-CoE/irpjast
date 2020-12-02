@@ -19,15 +19,16 @@ BEGIN_PROVIDER [double precision, factor_een]
         c_inv = 1.d0/c
         do p = 2, ncord
            x = 1.d0
-!           t0 = x* c** (rshift(p,1))
-!           t = t0
            do k = 0, p - 1
               if ( k /= 0 ) then
                  lmax = p - k
               else
                  lmax = p - k - 2
               end if
-              t = x* c** (rshift(p - k,1))
+              t = x
+              do l=1,rshift(p - k,1)
+                t = t*c
+              end do
               ! We have suppressed this if from the following loop:
               ! if ( iand(p - k - l, 1) == 0 ) then
               !
@@ -40,7 +41,6 @@ BEGIN_PROVIDER [double precision, factor_een]
                 y = a
                 z = b
               endif
-!              print *, ''
               do l = iand(p-k,1), lmax, 2
 !                 if (iand(p-k-l,1) == 0) then
                  factor_een = factor_een + cord_vect(l, k, p, alpha) * (y+z) * t
@@ -50,7 +50,6 @@ BEGIN_PROVIDER [double precision, factor_een]
               end do
               x = x * u
            end do
-!           t0 = t0*c_inv
         end do
        end do
     end do
