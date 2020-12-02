@@ -13,11 +13,13 @@ BEGIN_PROVIDER [ double precision, elec_coord, (nelec, 3) ]
  ! Electron coordinates
  END_DOC
  integer :: i,j
+ PROVIDE seed
  do j = 1 , 3
    do i = 1, nelec
      call random_number(elec_coord(i, j))
    enddo
  enddo
+ FREE seed
 
 END_PROVIDER
 

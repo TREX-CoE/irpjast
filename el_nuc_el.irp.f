@@ -5,6 +5,7 @@ BEGIN_PROVIDER [double precision, factor_een]
  END_DOC
  integer :: i, j, alpha, p, k, l, lmax = 0
  double precision :: x, y, z, t, c_inv, u, a, b, a2, b2, c, t0
+ PROVIDE cord_vect
  factor_een = 0.0d0
 
  do alpha = 1, nnuc
@@ -29,7 +30,7 @@ BEGIN_PROVIDER [double precision, factor_een]
               do l=1,rshift(p - k,1)
                 t = t*c
               end do
-              ! We have suppressed this if from the following loop:
+              ! We have suppressed this from the following loop:
               ! if ( iand(p - k - l, 1) == 0 ) then
               !
               ! Start from l=0 when p-k is even
@@ -42,11 +43,10 @@ BEGIN_PROVIDER [double precision, factor_een]
                 z = b
               endif
               do l = iand(p-k,1), lmax, 2
-!                 if (iand(p-k-l,1) == 0) then
-                 factor_een = factor_een + cord_vect(l, k, p, alpha) * (y+z) * t
-                 t = t * c_inv
-                 y = y * a2
-                 z = z * b2
+                factor_een = factor_een + cord_vect(l, k, p, alpha) * (y+z) * t
+                t = t * c_inv
+                y = y * a2
+                z = z * b2
               end do
               x = x * u
            end do

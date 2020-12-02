@@ -28,8 +28,10 @@ BEGIN_PROVIDER [double precision, aord_vect, (naord)]
  ! Vector of the `a' coefficients
  END_DOC
  integer :: i
+ PROVIDE seed
  call random_number(aord_vect)
- aord_vect = aord_vect*.1e-2
+ aord_vect = aord_vect*.1d-2
+ FREE seed
 END_PROVIDER
 
 BEGIN_PROVIDER [double precision, bord_vect, (nbord)]
@@ -38,8 +40,10 @@ BEGIN_PROVIDER [double precision, bord_vect, (nbord)]
  ! Vector of the `b' coefficients
  END_DOC
  integer :: i
+ PROVIDE seed
  call random_number(bord_vect)
- bord_vect = bord_vect*.1e-6
+ bord_vect = bord_vect*.1d-6
+ FREE seed
 END_PROVIDER
 
 BEGIN_PROVIDER [double precision, cord_vect, (0:ncord,0:ncord,ncord,nnuc)]
@@ -47,6 +51,8 @@ BEGIN_PROVIDER [double precision, cord_vect, (0:ncord,0:ncord,ncord,nnuc)]
  BEGIN_DOC
  ! Vector of the `c' coefficients
  END_DOC
+ PROVIDE seed
  call random_number(cord_vect)
- cord_vect = cord_vect*.1e-4
+ cord_vect = cord_vect*.1d-4
+ FREE seed
 END_PROVIDER
