@@ -74,13 +74,13 @@ END_PROVIDER
 !  FREE seed
 ! END_PROVIDER
 ! 
-! BEGIN_PROVIDER [double precision, cord_vect, (0:ncord,0:ncord,ncord,nnuc)]
-!  implicit none
-!  BEGIN_DOC
-!  ! Vector of the `c' coefficients
-!  END_DOC
-!  PROVIDE seed
-!  call random_number(cord_vect)
-!  cord_vect = cord_vect*.1d-4
-!  FREE seed
-! END_PROVIDER
+BEGIN_PROVIDER [double precision, cord_vect_0, (0:ncord,0:ncord,ncord,nnuc)]
+ implicit none
+ BEGIN_DOC
+ ! Vector of the `c' coefficients
+ END_DOC
+ PROVIDE seed
+ call random_number(cord_vect_0)
+ cord_vect_0 = cord_vect_0 * .1d-4
+ FREE seed
+END_PROVIDER
