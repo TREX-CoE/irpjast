@@ -13,13 +13,11 @@ BEGIN_PROVIDER [ double precision, nuc_coord, (nnuc, 3) ]
  ! Nuclei coordinates
  END_DOC
  integer :: i, j
- PROVIDE seed
  do j = 1 , 3
    do i = 1, nnuc
-     call random_number(nuc_coord(i, j))
+     nuc_coord(i, j) = dble(i) 
    enddo
  enddo
- FREE seed
 
 END_PROVIDER
 

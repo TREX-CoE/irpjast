@@ -24,7 +24,7 @@ END_PROVIDER
 
 BEGIN_PROVIDER [double precision, aord_vect, (naord)]
 &BEGIN_PROVIDER [double precision, bord_vect, (nbord)]
-&BEGIN_PROVIDER [double precision, cord_vect, ((ncord + 1) * (ncord + 1) * ncord * nnuc)]
+&BEGIN_PROVIDER [double precision, cord_vect, (0:ncord , 0:ncord  , ncord , nnuc)]
 implicit none
 BEGIN_DOC
 ! Read Jastow coefficients from file (NEEDS OPTIMIZATION!)
@@ -34,19 +34,15 @@ PROVIDE nbord
 PROVIDE ncord
 character(len=*), parameter :: FILE_NAME = "orders_inp"
 integer :: i, fu, rc, maxord
-double precision, dimension((ncord + 1) * (ncord + 1) * ncord * nnuc + naord + nbord) :: allord_vect
+double precision, dimension((ncord + 1) * (ncord + 1) * ncord * nnuc) :: allord_vect
 
 maxord = (ncord + 1) * (ncord + 1) * ncord * nnuc + naord + nbord
 
 open(action='read', file=FILE_NAME, iostat=rc, newunit=fu)
 
-do i = 1, maxord
-   read(fu, *) allord_vect(i)
-end do
-
-aord_vect = allord_vect(1:naord)
-bord_vect = allord_vect(naord + 1: naord + nbord)
-cord_vect = allord_vect(naord + nbord + 1:)
+read(fu, *)  aord_vect
+read(fu, *)  bord_vect
+read(fu, *)  cord_vect
 
 close(fu)
 

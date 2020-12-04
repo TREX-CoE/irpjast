@@ -45,9 +45,9 @@ BEGIN_PROVIDER [double precision, factor_een]
                   z = b
                 endif
                 do l = iand(p - k, 1), lmax, 2
-                   cidx = 1 + l + (ncord + 1) * k + (ncord + 1) * (ncord + 1) * (p - 1) + &
-                        (ncord + 1) * (ncord + 1) * ncord * (alpha - 1)
-                   factor_een = factor_een + cord_vect(cidx) * (y + z) * t
+!                   cidx = 1 + l + (ncord + 1) * k + (ncord + 1) * (ncord + 1) * (p - 1) + &
+!                        (ncord + 1) * (ncord + 1) * ncord * (alpha - 1)
+                   factor_een = factor_een + cord_vect(l, k, p, alpha) * (y + z) * t
                    t = t * c_inv
                    y = y * a2
                    z = z * b2
