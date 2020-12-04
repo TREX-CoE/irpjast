@@ -3,6 +3,7 @@ BEGIN_PROVIDER [ double precision, jastrow_full ]
  BEGIN_DOC
  ! Complete jastrow factor 
  END_DOC
+
  print *, factor_ee
  print *, factor_en
  print *, factor_een

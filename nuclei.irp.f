@@ -46,13 +46,17 @@ BEGIN_PROVIDER [double precision, factor_en]
  ! Electron-nuclei contribution to Jastrow factor
  END_DOC
  integer :: i, j, p
- double precision :: pow_ser = 0.0d0
+ double precision :: pow_ser, x
+
  factor_en = 0.0d0
+ pow_ser = 0.0d0
 
  do j = 1 , nnuc
     do i = 1, nnuc
+       x = rescale_en(i, j)
        do p = 2, naord
-          pow_ser = pow_ser + aord_vect(p) * rescale_en(i, j) ** p
+          x = x * rescale_en(i, j) 
+          pow_ser = pow_ser + aord_vect(p) * x
        end do
        factor_en = factor_en + aord_vect(1) * rescale_en(i, j) &
             / (1 + aord_vect(2) * rescale_en(i, j)) + pow_ser

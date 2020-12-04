@@ -46,17 +46,21 @@ BEGIN_PROVIDER [double precision, factor_ee]
  ! Electron-electron contribution to Jastrow factor
  END_DOC
  integer :: i, j, p
- double precision :: pow_ser = 0.0d0
+ double precision :: pow_ser, x
  factor_ee = 0.0d0
+ pow_ser = 0.0d0
 
  do j = 1 , nelec
     do i = 1, nelec
+       x = rescale_ee(i, j) 
        do p = 2, nbord
-          pow_ser = pow_ser + bord_vect(p) * rescale_ee(i, j) ** p
+          x = x * rescale_ee(i, j)
+          pow_ser = pow_ser + bord_vect(p) * x
        end do
        factor_ee = factor_ee + bord_vect(1) * rescale_ee(i, j) &
             / (1 + bord_vect(2) * rescale_ee(i, j)) + pow_ser
     end do
  end do
+
  factor_ee = 0.5d0 * factor_ee
 END_PROVIDER

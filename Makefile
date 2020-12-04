@@ -1,10 +1,8 @@
-IRPF90 = ~/irpf90/bin/irpf90 --codelet factor_een:200
-#FC = gfortran
-#FCFLAGS= -g -msse4.2  -fcheck=all -Waliasing -Wampersand -Wconversion -Wsurprising -Wintrinsics-std -Wno-tabs -Wintrinsic-shadow -Wline-truncation -Wreal-q-constant -Wuninitialized  -fbacktrace -ffpe-trap=zero,overflow,underflow -finit-real=nan
-FC     = ifort -g
-FCFLAGS= -O2 -xHost -I .
+IRPF90 = irpf90  #-a -d
+FC     = gfortran
+FCFLAGS= -O2 -ffree-line-length-none -I .
 NINJA  = ninja
-AR     = ar crs
+AR     = ar
 RANLIB = ranlib
 
 SRC=
