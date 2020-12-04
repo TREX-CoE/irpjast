@@ -45,12 +45,8 @@ BEGIN_PROVIDER [double precision, factor_een]
                   z = b
                 endif
                 do l = iand(p - k, 1), lmax, 2
-                   ! factor_een = factor_een + cord_vect(l, k, p, alpha) * (y + z) * t
-                   ! cidx = l + (ncord + 1) * k + (ncord + 1) * (ncord + 1) * p + &
-                   !      (ncord + 1) * (ncord + 1) * ncord * alpha
-                   ! here I try to use the flattened version of the array
-                   cidx = l + 6 * k + 6 * 6 * p + 6 * 6 * 5 * alpha
-                   print *, cidx
+                   cidx = 1 + l + (ncord + 1) * k + (ncord + 1) * (ncord + 1) * (p - 1) + &
+                        (ncord + 1) * (ncord + 1) * ncord * (alpha - 1)
                    factor_een = factor_een + cord_vect(cidx) * (y + z) * t
                    t = t * c_inv
                    y = y * a2
