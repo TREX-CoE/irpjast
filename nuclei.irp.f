@@ -3,7 +3,18 @@ BEGIN_PROVIDER [ integer, nnuc ]
  BEGIN_DOC
  ! Number of nuclei
  END_DOC
- nnuc = 10
+ nnuc = 2
+END_PROVIDER
+
+
+BEGIN_PROVIDER [ integer, typenuc ]
+&BEGIN_PROVIDER [integer, typenuc_arr, (nnuc)]
+ implicit none
+ BEGIN_DOC
+ ! Number of nuclei
+ END_DOC
+ typenuc = 1
+ typenuc_arr = (/1, 1/)
 END_PROVIDER
 
 
@@ -12,12 +23,14 @@ BEGIN_PROVIDER [ double precision, nuc_coord, (nnuc, 3) ]
  BEGIN_DOC
  ! Nuclei coordinates
  END_DOC
- integer :: i, j
- do j = 1 , 3
-   do i = 1, nnuc
-     nuc_coord(i, j) = dble(i) 
-   enddo
- enddo
+ character(len=*), parameter :: FILE_NAME = "geometry.txt"
+ integer :: fu, rc
+ 
+ open(action='read', file=FILE_NAME, iostat=rc, newunit=fu)
+
+ read(fu, *) nuc_coord 
+ 
+ close(fu)
 
 END_PROVIDER
 
@@ -43,21 +56,21 @@ BEGIN_PROVIDER [double precision, factor_en]
  BEGIN_DOC
  ! Electron-nuclei contribution to Jastrow factor
  END_DOC
- integer :: i, j, p
+ integer :: i, j, p, q
  double precision :: pow_ser, x
 
  factor_en = 0.0d0
  pow_ser = 0.0d0
 
  do j = 1 , nnuc
-    do i = 1, nnuc
+    do i = 1, nelec
        x = rescale_en(i, j)
        do p = 2, naord
           x = x * rescale_en(i, j) 
-          pow_ser = pow_ser + aord_vect(p) * x
+          pow_ser = pow_ser + aord_vect(p, typenuc_arr(j)) * x
        end do
-       factor_en = factor_en + aord_vect(1) * rescale_en(i, j) &
-            / (1 + aord_vect(2) * rescale_en(i, j)) + pow_ser
+       factor_en = factor_en + aord_vect(1, typenuc_arr(j)) * rescale_en(i, j) &
+            / (1 + aord_vect(2, typenuc_arr(j)) * rescale_en(i, j)) + pow_ser
     end do
  end do
 

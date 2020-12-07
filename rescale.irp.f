@@ -3,7 +3,7 @@ BEGIN_PROVIDER [ double precision, kappa ]
  BEGIN_DOC
  ! Constant in rescaling
  END_DOC
- kappa = 1.5d0
+ kappa = 0.6d0
 END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, kappa_inv ]

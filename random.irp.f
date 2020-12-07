@@ -19,5 +19,3 @@ BEGIN_PROVIDER [ integer, seed, (seed_size) ]
  call random_seed(put=seed)
 
 END_PROVIDER
-
-

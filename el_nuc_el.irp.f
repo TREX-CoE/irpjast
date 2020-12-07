@@ -3,12 +3,11 @@ BEGIN_PROVIDER [double precision, factor_een]
  BEGIN_DOC
  ! Electron-electron nucleus contribution to Jastrow factor
  END_DOC
- integer :: i, j, alpha, p, k, l, lmax, cidx
+ integer :: i, j, alpha, p, k, l, lmax
  double precision :: x, y, z, t, c_inv, u, a, b, a2, b2, c, t0
 
  PROVIDE cord_vect
  factor_een = 0.0d0
- cidx = 0
 
  do alpha = 1, nnuc
     do j = 1, nelec
@@ -45,8 +44,9 @@ BEGIN_PROVIDER [double precision, factor_een]
                   z = b
                 endif
                 do l = iand(p - k, 1), lmax, 2
-!                   cidx = 1 + l + (ncord + 1) * k + (ncord + 1) * (ncord + 1) * (p - 1) + &
-!                        (ncord + 1) * (ncord + 1) * ncord * (alpha - 1)
+                   ! This can be used in case of a flatten cord_vect
+                   ! cidx = 1 + l + (ncord + 1) * k + (ncord + 1) * (ncord + 1) * (p - 1) + &
+                   !      (ncord + 1) * (ncord + 1) * ncord * (alpha - 1)
                    factor_een = factor_een + cord_vect(l, k, p, alpha) * (y + z) * t
                    t = t * c_inv
                    y = y * a2

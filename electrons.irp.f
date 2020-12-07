@@ -3,7 +3,7 @@ BEGIN_PROVIDER [ integer, nelec ]
  BEGIN_DOC
  ! Number of electrons
  END_DOC
- nelec = 100
+ nelec = 10
 END_PROVIDER
 
 
@@ -12,14 +12,14 @@ BEGIN_PROVIDER [ double precision, elec_coord, (nelec, 3) ]
  BEGIN_DOC
  ! Electron coordinates
  END_DOC
- integer :: i,j
- PROVIDE seed
- do j = 1 , 3
-   do i = 1, nelec
-     call random_number(elec_coord(i, j))
-   enddo
- enddo
- FREE seed
+ character(len=*), parameter :: FILE_NAME = "elec_coord.txt"
+ integer :: fu, rc
+
+ open(action='read', file=FILE_NAME, iostat=rc, newunit=fu)
+
+ read(fu, *) elec_coord
+
+ close(fu)
 
 END_PROVIDER
 
