@@ -24,11 +24,13 @@ BEGIN_PROVIDER [ double precision, nuc_coord, (nnuc, 3) ]
  ! Nuclei coordinates
  END_DOC
  character(len=*), parameter :: FILE_NAME = "geometry.txt"
- integer :: fu, rc
+ integer :: fu, rc, i
  
  open(action='read', file=FILE_NAME, iostat=rc, newunit=fu)
 
- read(fu, *) nuc_coord 
+ do i = 1, nnuc
+    read(fu, *) nuc_coord(i, :)
+ end do
  
  close(fu)
 
@@ -42,12 +44,12 @@ BEGIN_PROVIDER [ double precision, elnuc_dist, (nelec, nnuc) ]
  integer :: i, j
  double precision :: x, y, z
  do j = 1, nnuc
-  do i = 1, nelec
-    x = elec_coord(i, 1) - nuc_coord(j, 1)
-    y = elec_coord(i, 2) - nuc_coord(j, 2)
-    z = elec_coord(i, 3) - nuc_coord(j, 3)
-    elnuc_dist(i, j) = dsqrt( x*x + y*y + z*z )
-  enddo
+    do i = 1, nelec
+       x = elec_coord(i, 1) - nuc_coord(j, 1)
+       y = elec_coord(i, 2) - nuc_coord(j, 2)
+       z = elec_coord(i, 3) - nuc_coord(j, 3)
+       elnuc_dist(i, j) = dsqrt( x*x + y*y + z*z )
+    enddo
  enddo
 END_PROVIDER
 
@@ -64,10 +66,10 @@ BEGIN_PROVIDER [double precision, factor_en]
 
  do j = 1 , nnuc
     do i = 1, nelec
-       x = rescale_en(i, j)
+       x = rescale_en(i, j) * rescale_en(i, j)
        do p = 2, naord
           x = x * rescale_en(i, j) 
-          pow_ser = pow_ser + aord_vect(p, typenuc_arr(j)) * x
+          pow_ser = pow_ser + aord_vect(p + 1, typenuc_arr(j)) * x
        end do
        factor_en = factor_en + aord_vect(1, typenuc_arr(j)) * rescale_en(i, j) &
             / (1 + aord_vect(2, typenuc_arr(j)) * rescale_en(i, j)) + pow_ser

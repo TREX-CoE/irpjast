@@ -3,7 +3,7 @@ BEGIN_PROVIDER [double precision, factor_een]
  BEGIN_DOC
  ! Electron-electron nucleus contribution to Jastrow factor
  END_DOC
- integer :: i, j, alpha, p, k, l, lmax
+ integer :: i, j, alpha, p, k, l, lmax, cindex
  double precision :: x, y, z, t, c_inv, u, a, b, a2, b2, c, t0
 
  PROVIDE cord_vect
@@ -19,6 +19,7 @@ BEGIN_PROVIDER [double precision, factor_een]
           b2 = b * b
           c = rescale_een_n(i, alpha) * rescale_een_n(j, alpha)
           c_inv = 1.0d0 / c
+          cindex = 0
           do p = 2, ncord
              x = 1.0d0
              do k = 0, p - 1
@@ -47,7 +48,8 @@ BEGIN_PROVIDER [double precision, factor_een]
                    ! This can be used in case of a flatten cord_vect
                    ! cidx = 1 + l + (ncord + 1) * k + (ncord + 1) * (ncord + 1) * (p - 1) + &
                    !      (ncord + 1) * (ncord + 1) * ncord * (alpha - 1)
-                   factor_een = factor_een + cord_vect(l, k, p, alpha) * (y + z) * t
+                   cindex = cindex + 1
+                   factor_een = factor_een + cord_vect(cindex, typenuc_arr(alpha)) * (y + z) * t
                    t = t * c_inv
                    y = y * a2
                    z = z * b2

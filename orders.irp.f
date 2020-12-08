@@ -21,10 +21,35 @@ BEGIN_PROVIDER [integer, ncord]
  END_DOC
  ncord = 5
 END_PROVIDER
+ 
+BEGIN_PROVIDER [integer, dim_cord_vect]
+ implicit none
+ BEGIN_DOC
+ ! Recomputes the length of the unique C coefficients
+ END_DOC
+ integer :: k, p, l, lmax
 
-BEGIN_PROVIDER [double precision, aord_vect, (naord, typenuc)]
-&BEGIN_PROVIDER [double precision, bord_vect, (nbord)]
-&BEGIN_PROVIDER [double precision, cord_vect, (0:ncord , 0:ncord  , ncord , typenuc)]
+ dim_cord_vect = 0
+
+ do p = 2, ncord
+    do k = 0, p - 1
+       if ( k /= 0 ) then
+          lmax = p - k
+       else
+          lmax = p - k - 2
+       end if
+       do l = iand(p - k, 1), lmax, 2
+          dim_cord_vect = dim_cord_vect + 1
+       end do
+    end do
+ end do
+ 
+END_PROVIDER
+ 
+
+BEGIN_PROVIDER [double precision, aord_vect, (0:naord, typenuc)]
+&BEGIN_PROVIDER [double precision, bord_vect, (0:nbord)]
+&BEGIN_PROVIDER [double precision, cord_vect, (dim_cord_vect, typenuc)]
  implicit none
  BEGIN_DOC
  ! Read Jastow coefficients from file
