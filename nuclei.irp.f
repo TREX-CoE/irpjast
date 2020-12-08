@@ -62,11 +62,11 @@ BEGIN_PROVIDER [double precision, factor_en]
  double precision :: pow_ser, x
 
  factor_en = 0.0d0
- pow_ser = 0.0d0
 
  do j = 1 , nnuc
     do i = 1, nelec
-       x = rescale_en(i, j) * rescale_en(i, j)
+       x = rescale_en(i, j) 
+       pow_ser = 0.0d0
        do p = 2, naord
           x = x * rescale_en(i, j) 
           pow_ser = pow_ser + aord_vect(p + 1, typenuc_arr(j)) * x
@@ -76,5 +76,4 @@ BEGIN_PROVIDER [double precision, factor_en]
     end do
  end do
 
- factor_en = 0.5d0 * factor_en
 END_PROVIDER

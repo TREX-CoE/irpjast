@@ -47,8 +47,8 @@ BEGIN_PROVIDER [integer, dim_cord_vect]
 END_PROVIDER
  
 
-BEGIN_PROVIDER [double precision, aord_vect, (0:naord, typenuc)]
-&BEGIN_PROVIDER [double precision, bord_vect, (0:nbord)]
+BEGIN_PROVIDER [double precision, aord_vect, (naord + 1, typenuc)]
+&BEGIN_PROVIDER [double precision, bord_vect, (nbord + 1)]
 &BEGIN_PROVIDER [double precision, cord_vect, (dim_cord_vect, typenuc)]
  implicit none
  BEGIN_DOC

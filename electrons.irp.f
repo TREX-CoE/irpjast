@@ -6,6 +6,14 @@ BEGIN_PROVIDER [ integer, nelec ]
  nelec = 10
 END_PROVIDER
 
+BEGIN_PROVIDER [ integer, nelec_up ]
+ implicit none
+ BEGIN_DOC
+ ! Number of alpha and beta electrons
+ END_DOC
+ nelec_up = 5
+END_PROVIDER
+
 
 BEGIN_PROVIDER [ double precision, elec_coord, (nelec, 3) ]
  implicit none
@@ -22,6 +30,7 @@ BEGIN_PROVIDER [ double precision, elec_coord, (nelec, 3) ]
  end do
 
  close(fu)
+
 END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, elec_dist, (nelec, nelec) ]
@@ -48,22 +57,30 @@ BEGIN_PROVIDER [double precision, factor_ee]
  ! Electron-electron contribution to Jastrow factor
  END_DOC
  integer :: i, j, p
- double precision :: pow_ser, x
+ double precision :: pow_ser, x, b_one
 
  factor_ee = 0.0d0
- pow_ser = 0.0d0
 
  do j = 1, nelec
     do i = 1, nelec
-       x = rescale_ee(i, j) * rescale_ee(i, j)
+       x = rescale_ee(i, j) 
+       pow_ser = 0.0d0
        do p = 2, nbord
           x = x * rescale_ee(i, j)
           pow_ser = pow_ser + bord_vect(p + 1) * x
        end do
-       factor_ee = factor_ee + bord_vect(1) * rescale_ee(i, j) &
+
+       if (i <= nelec_up .or. j >= nelec_up) then
+           b_one = bord_vect(1) * 0.5d0
+       else
+	   b_one = bord_vect(1)
+       end if
+
+       factor_ee = factor_ee + b_one * rescale_ee(i, j) &
             / (1.0d0 + bord_vect(2) * rescale_ee(i, j)) + pow_ser
     end do
  end do
 
  factor_ee = 0.5d0 * factor_ee
+
 END_PROVIDER
