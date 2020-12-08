@@ -67,12 +67,15 @@ BEGIN_PROVIDER [double precision, factor_en]
     do i = 1, nelec
        x = rescale_en(i, j) 
        pow_ser = 0.0d0
+
        do p = 2, naord
           x = x * rescale_en(i, j) 
           pow_ser = pow_ser + aord_vect(p + 1, typenuc_arr(j)) * x
        end do
+
        factor_en = factor_en + aord_vect(1, typenuc_arr(j)) * rescale_en(i, j) &
             / (1 + aord_vect(2, typenuc_arr(j)) * rescale_en(i, j)) + pow_ser
+
     end do
  end do
 
