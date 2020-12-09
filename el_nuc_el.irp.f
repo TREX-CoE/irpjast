@@ -64,3 +64,103 @@ BEGIN_PROVIDER [double precision, factor_een]
  factor_een = 0.5d0 * factor_een
 
 END_PROVIDER
+
+BEGIN_PROVIDER [double precision, factor_een_naive]
+ implicit none
+ BEGIN_DOC
+ ! Electron-electron nucleus contribution to Jastrow factor in a naive way
+ END_DOC
+ integer :: i, j, alpha, p, k, l, lmax, cindex
+ double precision :: ria, rja, rij
+
+ PROVIDE cord_vect
+ factor_een_naive = 0.0d0
+ 
+ do alpha = 1, nnuc
+    do j = 2, nelec
+       rja = rescale_een_n(j, alpha)
+       do i = 1, j - 1
+          ria = rescale_een_n(i, alpha)
+          rij = rescale_een_e(i, j)
+          cindex = 0
+          do p = 2, ncord
+             do k = p - 1, 0, -1
+                if ( k /= 0 ) then
+                   lmax = p - k
+                else
+                   lmax = p - k - 2
+                end if
+                do l = lmax, 0, -1
+                   if ( iand(p - k - l, 1) == 0 ) then
+                      cindex = cindex + 1
+                      factor_een_naive = factor_een_naive + &
+                           cord_vect(cindex, typenuc_arr(alpha)) * &
+                           rij ** k * (ria ** l + rja ** l) * (ria * rja) ** rshift(p - k - l, 1)
+                      print *, "a", (ria * rja) ** rshift(p - k - l, 1)
+                   end if
+                end do
+             end do
+          end do
+       end do
+    end do
+ end do
+
+END_PROVIDER
+
+BEGIN_PROVIDER [double precision, factor_een_prog]
+ implicit none
+ BEGIN_DOC
+ ! Electron-electron nucleus contribution to Jastrow factor in a naive way
+ END_DOC
+ integer :: alpha, i, j, p, k, l, lmax, m, cindex
+ double precision :: ria, rja, rij, rij_inv
+ double precision :: c, c_inv, t, x, y, z ! Placeholders for optimization
+                                                                                                 
+ PROVIDE cord_vect
+ factor_een_prog = 0.0d0
+                                                                                                 
+ do alpha = 1, nnuc
+    do j = 2, nelec
+       rja = rescale_een_n(j, alpha)
+       do i = 1, j - 1
+          ria = rescale_een_n(i, alpha)
+          rij = rescale_een_e(i, j)
+          rij_inv =  1.0d0 / (rij * rij)
+          c = ria * rja
+          c_inv = 1.0d0 / c
+          cindex = 0
+          do p = 2, ncord
+
+             x = 1.0d0
+             do l = 1, p - 1
+               x = x * rij
+             end do
+
+             do k = p - 1, 0, -1
+                if ( k /= 0 ) then
+                   lmax = p - k
+                else
+                   lmax = p - k - 2
+                end if
+
+                t = 1.0d0
+                do l = 1, rshift(p - k, 1)
+                  t = t * c
+                end do
+
+                do l = lmax, iand(p - k, 1), -2
+                   cindex = cindex + 1
+                   factor_een_prog = factor_een_prog + &
+                        cord_vect(cindex, typenuc_arr(alpha)) * &
+                        x * (ria ** l + rja ** l) * t
+                   t = t * c_inv
+                   x = x * rij_inv
+                end do
+
+             end do
+          end do
+       end do
+    end do
+ end do
+                                                                                                 
+END_PROVIDER
