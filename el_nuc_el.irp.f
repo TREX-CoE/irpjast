@@ -71,17 +71,17 @@ BEGIN_PROVIDER [double precision, factor_een_naive]
  ! Electron-electron nucleus contribution to Jastrow factor in a naive way
  END_DOC
  integer :: i, j, alpha, p, k, l, lmax, cindex
- !double precision :: ria, rja, rij
+ double precision :: ria, rja, rij
 
  PROVIDE cord_vect
  factor_een_naive = 0.0d0
  
  do alpha = 1, nnuc
     do j = 2, nelec
-       !rja = rescale_een_n(j, alpha)
+       rja = rescale_een_n(j, alpha)
        do i = 1, j - 1
-          !ria = rescale_een_n(i, alpha)
-          !rij = rescale_een_e(i, j)
+          ria = rescale_een_n(i, alpha)
+          rij = rescale_een_e(i, j)
           cindex = 0
           do p = 2, ncord
              do k = p - 1, 0, -1
@@ -93,13 +93,13 @@ BEGIN_PROVIDER [double precision, factor_een_naive]
                 do l = lmax, 0, -1
                    if ( iand(p - k - l, 1) == 0 ) then
                       cindex = cindex + 1
-                      !factor_een_naive = factor_een_naive + &
-                      !     cord_vect(cindex, typenuc_arr(alpha)) * &
-                      !     rij ** k * (ria ** l + rja ** l) * (ria * rja) ** rshift(p - k - l, 1)
                       factor_een_naive = factor_een_naive + &
                            cord_vect(cindex, typenuc_arr(alpha)) * &
-                           rij(i, j, k) * (ria(i, alpha, l) + rja(j, alpha, l)) &
-                           * (ria(i, alpha, l) * rja(j, alpha, l)) ** rshift(p - k - l, 1)
+                           rij ** k * (ria ** l + rja ** l) * (ria * rja) ** rshift(p - k - l, 1)
+                      !factor_een_naive = factor_een_naive + &
+                      !     cord_vect(cindex, typenuc_arr(alpha)) * &
+                      !     rij(i, j, k) * (ria(i, alpha, l) + rja(j, alpha, l)) &
+                      !     * (ria(i, alpha, l) * rja(j, alpha, l)) ** rshift(p - k - l, 1)
                    end if
                 end do
              end do
@@ -168,41 +168,41 @@ END_PROVIDER
 !
 !END_PROVIDER
 
-BEGIN_PROVIDER [double precision, rij, (nelec, nelec, ncord)]
-&BEGIN_PROVIDER [double precision, ria, (nelec, nnuc, ncord)]
-&BEGIN_PROVIDER [double precision, rja, (nelec, nnuc, ncord)]
- BEGIN_DOC
- ! Tables with powers
- END_DOC
- integer :: i, j, k, alpha
- double precision :: x, y, z
-
- rij(:, :, :) = 0.0d0
- ria(:, :, :) = 0.0d0
- rja(:, :, :) = 0.0d0
- 
- implicit none
- do alpha = 1, nnuc
-    do j = 2, nelec
-       z = 1.0d0
-       do k = 1, ncord
-          rja(j, alpha, k) = z
-          z = z * rescale_een_n(j, alpha)
-       end do
-       do i = 1, j - 1
-          y = 1.0d0
-          do k = 1, ncord
-             ria(i, alpha, k) = y
-             y = y * rescale_een_n(i, alpha)
-          end do
-          x = 1.0d0
-          do k = 1, ncord
-             rij(i, j, k) = x
-             x = x * rescale_een_e(i, j)
-          end do
-       end do
-    end do
- end do
-
-END_PROVIDER
+!BEGIN_PROVIDER [double precision, rij, (nelec, nelec, ncord)]
+!&BEGIN_PROVIDER [double precision, ria, (nelec, nnuc, ncord)]
+!&BEGIN_PROVIDER [double precision, rja, (nelec, nnuc, ncord)]
+! BEGIN_DOC
+! ! Tables with powers
+! END_DOC
+! integer :: i, j, k, alpha
+! double precision :: x, y, z
+!
+! rij(:, :, :) = 0.0d0
+! ria(:, :, :) = 0.0d0
+! rja(:, :, :) = 0.0d0
+! 
+! implicit none
+! do alpha = 1, nnuc
+!    do j = 2, nelec
+!       z = 1.0d0
+!       do k = 1, ncord
+!          rja(j, alpha, k) = z
+!          z = z * rescale_een_n(j, alpha)
+!       end do
+!       do i = 1, j - 1
+!          y = 1.0d0
+!          do k = 1, ncord
+!             ria(i, alpha, k) = y
+!             y = y * rescale_een_n(i, alpha)
+!          end do
+!          x = 1.0d0
+!          do k = 1, ncord
+!             rij(i, j, k) = x
+!             x = x * rescale_een_e(i, j)
+!          end do
+!       end do
+!    end do
+! end do
+!
+!END_PROVIDER
  
