@@ -69,3 +69,31 @@ BEGIN_PROVIDER [double precision, aord_vect, (naord + 1, typenuc)]
  close(fu)
 
 END_PROVIDER
+
+BEGIN_PROVIDER [ double precision, cord_vect_lkp, (0:ncord-1, 0:ncord-1, 2:ncord, typenuc) ]
+ implicit none
+ BEGIN_DOC
+ ! 
+ END_DOC
+ integer :: alpha, l,k,p,lmax,cindex
+
+ cord_vect_lkp = 0.d0
+ cindex = 0
+ do alpha=1,typenuc
+   do p = 2, ncord
+     do k = p-1, 0, -1
+       if ( k /= 0 ) then
+         lmax = p - k
+       else
+         lmax = p - k - 2
+       end if
+       do l = lmax, 0, -1
+         if (iand(p-k-l,1) == 1) cycle
+         cindex = cindex + 1
+         cord_vect_lkp(l,k,p,alpha) = cord_vect(cindex, alpha)
+       end do
+     end do
+   end do
+ end do
+
+END_PROVIDER

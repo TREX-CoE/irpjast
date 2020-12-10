@@ -11,13 +11,13 @@ BEGIN_PROVIDER [double precision, factor_een]
 
  do alpha = 1, nnuc
     do j = 1, nelec
-       b = rescale_een_n(j, alpha)
+       b = rescale_een_n(j, alpha, 1)
        do i = 1, nelec
-          u = rescale_een_e(i, j)
-          a = rescale_een_n(i, alpha)
+          u = rescale_een_e(i, j, 1)
+          a = rescale_een_n(i, alpha, 1)
           a2 = a * a
           b2 = b * b
-          c = rescale_een_n(i, alpha) * rescale_een_n(j, alpha)
+          c = rescale_een_n(i, alpha, 1) * rescale_een_n(j, alpha, 1)
           c_inv = 1.0d0 / c
           cindex = 0
           do p = 2, ncord
@@ -64,3 +64,50 @@ BEGIN_PROVIDER [double precision, factor_een]
  factor_een = 0.5d0 * factor_een
 
 END_PROVIDER
+
+
+
+BEGIN_PROVIDER [ double precision, factor_een_2 ]
+ implicit none
+ BEGIN_DOC
+ !
+ END_DOC
+ integer :: i,j,a,p,k,l,lmax,m
+ double precision :: riam, rjam_cn, rial, rjal, rijk
+ double precision :: cn
+
+ factor_een_2 = 0.0d0
+
+ do p=2,ncord
+   do k=0,p-1
+     if (k /= 0) then
+       lmax = p-k
+     else
+       lmax = p-k-2
+     endif
+
+     do l=0,lmax
+       if ( iand(p-k-l,1) == 1) cycle
+       m = (p-k-l)/2
+
+       do a=1, nnuc
+         cn = cord_vect_lkp(l,k,p,typenuc_arr(a))
+         do j=1, nelec
+           rjal    = rescale_een_n(j,a,l)
+           rjam_cn = rescale_een_n(j,a,m) * cn
+           do i=1, j-1
+             rial = rescale_een_n(i,a,l)
+             riam = rescale_een_n(i,a,m)
+             rijk = rescale_een_e(i,j,k)
+             factor_een_2 = factor_een_2 + &
+                            rijk * (rial+rjal) * riam * rjam_cn
+           enddo
+         enddo
+       enddo
+
+     enddo
+   enddo
+ enddo
+
+END_PROVIDER
+
