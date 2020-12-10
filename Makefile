@@ -1,4 +1,4 @@
-IRPF90 = irpf90  --codelet=factor_een_2:100000 #--codelet=factor_een:10000 
+IRPF90 = irpf90  --codelet=factor_een:100000
 FC     = gfortran
 FCFLAGS= -O2 -march=native -ffree-line-length-none -I .
 NINJA  = ninja
