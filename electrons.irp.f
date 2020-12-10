@@ -51,6 +51,28 @@ BEGIN_PROVIDER [ double precision, elec_dist, (nelec, nelec) ]
  enddo
 END_PROVIDER
 
+BEGIN_PROVIDER [double precision, asymp_jasb, (2)]
+ BEGIN_DOC
+ ! Asymptotic component subtracted from J_ee
+ END_DOC
+ implicit none
+ integer :: i, p
+ double precision :: asym_one, x
+
+ asym_one = bord_vect(1) * kappa_inv / (1.0d0 + bord_vect(2) * kappa_inv)
+ asymp_jasb(:) = (/asym_one, 0.5d0 * asym_one/)
+ 
+ do i = 1, 2
+    x = kappa_inv
+    do p = 2, nbord
+       x = x * kappa_inv
+       asymp_jasb(i) = asymp_jasb(i) + bord_vect(p + 1) * x
+    end do
+ end do
+
+END_PROVIDER
+ 
+
 BEGIN_PROVIDER [double precision, factor_ee]
  implicit none
  BEGIN_DOC
@@ -62,29 +84,26 @@ BEGIN_PROVIDER [double precision, factor_ee]
  factor_ee = 0.0d0
 
  do j = 1, nelec
-    do i = 1, nelec
+    do i = 1, j - 1
        x = rescale_ee(i, j) 
        pow_ser = 0.0d0
        spin_fact = 1.0d0
-       ipar = 0
+       ipar = 1
 
        do p = 2, nbord
           x = x * rescale_ee(i, j)
           pow_ser = pow_ser + bord_vect(p + 1) * x
        end do
 
-       if ((i.le.nelec_up .and. j.le.nelec_up) .or. &
-	       (i.gt.nelec_up .and. j.gt.nelec_up)) then
+       if (j.le.nelec_up .or. i.gt.nelec_up) then
            spin_fact = 0.5d0
-	   ipar = 1
+	   ipar = 2
        end if
 
        factor_ee = factor_ee + spin_fact * bord_vect(1) * rescale_ee(i, j) &
-            / (1.0d0 + bord_vect(2) * rescale_ee(i, j)) + pow_ser
+            / (1.0d0 + bord_vect(2) * rescale_ee(i, j)) - asymp_jasb(ipar) + pow_ser
 
     end do
  end do
-
- factor_ee = 0.5d0 * factor_ee
 
 END_PROVIDER
