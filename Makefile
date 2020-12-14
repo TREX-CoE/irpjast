@@ -1,8 +1,8 @@
-IRPF90 = irpf90  --codelet=factor_een:100000
+IRPF90 = irpf90  #-a -d
 FC     = gfortran
-FCFLAGS= -O2 -march=native -ffree-line-length-none -I .
+FCFLAGS= -O2 -ffree-line-length-none -I .
 NINJA  = ninja
-ARCHIVE= ar crs
+AR     = ar
 RANLIB = ranlib
 
 SRC=

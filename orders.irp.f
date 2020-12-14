@@ -73,24 +73,24 @@ END_PROVIDER
 BEGIN_PROVIDER [ double precision, cord_vect_lkp, (0:ncord-1, 0:ncord-1, 2:ncord, typenuc) ]
  implicit none
  BEGIN_DOC
- ! 
+ ! Creates c-tensor with right order of the indexes p, k, l
  END_DOC
- integer :: alpha, l,k,p,lmax,cindex
+ integer :: alpha, l, k, p, lmax, cindex
 
- cord_vect_lkp = 0.d0
+ cord_vect_lkp = 0.0d0
  cindex = 0
- do alpha=1,typenuc
+ do alpha = 1, typenuc
    do p = 2, ncord
-     do k = p-1, 0, -1
+     do k = p - 1, 0, -1
        if ( k /= 0 ) then
          lmax = p - k
        else
          lmax = p - k - 2
        end if
        do l = lmax, 0, -1
-         if (iand(p-k-l,1) == 1) cycle
+         if (iand(p - k - l, 1) == 1) cycle
          cindex = cindex + 1
-         cord_vect_lkp(l,k,p,alpha) = cord_vect(cindex, alpha)
+         cord_vect_lkp(l, k, p, alpha) = cord_vect(cindex, alpha)
        end do
      end do
    end do

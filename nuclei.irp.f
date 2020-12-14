@@ -11,7 +11,7 @@ BEGIN_PROVIDER [ integer, typenuc ]
 &BEGIN_PROVIDER [integer, typenuc_arr, (nnuc)]
  implicit none
  BEGIN_DOC
- ! Number of nuclei
+ ! Type of the nuclei
  END_DOC
  typenuc = 1
  typenuc_arr = (/1, 1/)
