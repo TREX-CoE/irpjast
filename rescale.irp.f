@@ -73,18 +73,20 @@ BEGIN_PROVIDER [double precision, rescale_een_n, (nelec, nnuc, 0:ncord)]
  BEGIN_DOC
  ! R = exp(-kappa r) for electron-electron for $J_{een}$
  END_DOC
- integer :: i, j, l
+ integer :: i, a, l
  double precision :: kappa_l
 
  do l = 0, ncord
     kappa_l = - dble(l) * kappa
-    do j = 1, nnuc
+    do a = 1, nnuc
        do i = 1, nelec
-          rescale_een_n(i, j, l) = kappa_l * elnuc_dist(i, j)
+          rescale_een_n(i, a, l) = kappa_l * elnuc_dist(i, a)
        enddo
     enddo
  enddo
+
  rescale_een_n = dexp(rescale_een_n)
+
 END_PROVIDER
 
 BEGIN_PROVIDER [double precision, rescale_een_n_deriv_e, (4, nelec, nnuc, 0:ncord)]
@@ -102,14 +104,15 @@ BEGIN_PROVIDER [double precision, rescale_een_n_deriv_e, (4, nelec, nnuc, 0:ncor
           ! r'(x) \lor r''(x)
           do ii = 1, 4
              rescale_een_n_deriv_e(ii, i, a, l) = &
-                 kappa_l * elnuc_dist_deriv_e(ii, i, a)
+                  kappa_l * elnuc_dist_deriv_e(ii, i, a)
+             !print *, "pp", ii, i, a, elnuc_dist_deriv_e(ii, i, a)
           enddo
 
           ! \left(r''(x)+r'(x)^2\right)
           rescale_een_n_deriv_e(4, i, a, l) = rescale_een_n_deriv_e(4, i, a, l) + &
-            rescale_een_n_deriv_e(1, i, a, l) * rescale_een_n_deriv_e(1, i, a, l) + &
-            rescale_een_n_deriv_e(2, i, a, l) * rescale_een_n_deriv_e(2, i, a, l) + &
-            rescale_een_n_deriv_e(3, i, a, l) * rescale_een_n_deriv_e(3, i, a, l)
+          rescale_een_n_deriv_e(1, i, a, l) * rescale_een_n_deriv_e(1, i, a, l) + &
+          rescale_een_n_deriv_e(2, i, a, l) * rescale_een_n_deriv_e(2, i, a, l) + &
+          rescale_een_n_deriv_e(3, i, a, l) * rescale_een_n_deriv_e(3, i, a, l)
 
           ! \times e^{r(x)}
           do ii = 1, 4
@@ -136,13 +139,14 @@ BEGIN_PROVIDER [double precision, elnuc_dist_deriv_e, (4, nelec, nnuc)]
        ria_inv = 1.0d0 / elnuc_dist(i, a)
        lap = 0.0d0
        do ii = 1, 3
+          ! \frac{x-x0}{\sqrt{c+(x-x0)^2}}
           elnuc_dist_deriv_e(ii, i, a) = (elec_coord(i, ii) - nuc_coord(a, ii)) * ria_inv
-          lap = ria_inv - elnuc_dist_deriv_e(ii, i, a) * elnuc_dist_deriv_e(ii, i, a) * ria_inv
+          ! 1 / \sqrt{c+(x-x0)^2} - (x-x0)^2 /\left(c+(x-x0)^2\right)^{3/2}
+          lap = lap + ria_inv - elnuc_dist_deriv_e(ii, i, a) * elnuc_dist_deriv_e(ii, i, a) * ria_inv
        end do
        elnuc_dist_deriv_e(4, i, a) = lap
     end do
  end do
-
 END_PROVIDER
 
 BEGIN_PROVIDER [double precision, rescale_een_e_deriv_e, (4, nelec, nelec, 0:ncord)]
@@ -190,24 +194,19 @@ BEGIN_PROVIDER [double precision, elec_dist_deriv_e, (4, nelec, nelec)]
  integer :: i, ii, j
  double precision :: rij_inv, lap
 
- do j = 1, nnuc
+ do j = 1, nelec
     do i = 1, nelec
-       rij_inv = 1.0d0 / elec_dist(i, j)
+       rij_inv = sign(1.0d0, dble(i - j)) / elec_dist(i, j)
        lap = 0.0d0
        do ii = 1, 3
+          ! \frac{x-x0}{\sqrt{c+(x-x0)^2}}
           elec_dist_deriv_e(ii, i, j) = (elec_coord(i, ii) - elec_coord(j, ii)) * rij_inv
-          lap = rij_inv - elec_dist_deriv_e(ii, i, j) * elec_dist_deriv_e(ii, i, j) * rij_inv
+          ! 1 / \sqrt{c+(x-x0)^2} - (x-x0)^2 /\left(c+(x-x0)^2\right)^{3/2}
+          lap = lap + rij_inv - elec_dist_deriv_e(ii, i, j) * elec_dist_deriv_e(ii, i, j) * rij_inv
        end do
-       elnuc_dist_deriv_e(4, i, j) = lap
+       elec_dist_deriv_e(4, i, j) = lap
+       elec_dist_deriv_e(:, i, i) = 0.0d0
     end do
  end do
 
 END_PROVIDER
-
-
-
-
-
-
-
-

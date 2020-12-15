@@ -97,6 +97,7 @@ BEGIN_PROVIDER [ double precision, factor_een_deriv_e, (4, nelec) ]
                       d2 = drjam_cn(ii) * riam
                       factor_een_deriv_e(ii, j) = factor_een_deriv_e(ii, j) + &
                          v1 * d2 + d1 * v2 + x(ii) * lap
+                      ! v(x) u''(x) + 2 * u'(x) v'(x) + u(x) v''(x)
                       lap = lap + d1 * d2
                    enddo
 
@@ -110,4 +111,3 @@ BEGIN_PROVIDER [ double precision, factor_een_deriv_e, (4, nelec) ]
  factor_een_deriv_e = 0.5d0 * factor_een_deriv_e
 
 END_PROVIDER
-
