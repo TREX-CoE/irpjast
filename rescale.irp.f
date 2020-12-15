@@ -188,7 +188,7 @@ BEGIN_PROVIDER [double precision, elec_dist_deriv_e, (4, nelec, nelec)]
  BEGIN_DOC
  ! Derivative of R_{ij} wrt x
  ! Dimensions 1-3 : dx, dy, dz
- ! Dimension 4 : d2x + d2y + d2z
+ ! Dimension 4 : d2x + d2y + d2z = 2/rij
  END_DOC
  implicit none
  integer :: i, ii, j
@@ -196,17 +196,14 @@ BEGIN_PROVIDER [double precision, elec_dist_deriv_e, (4, nelec, nelec)]
 
  do j = 1, nelec
     do i = 1, nelec
-       rij_inv = sign(1.0d0, dble(i - j)) / elec_dist(i, j)
-       lap = 0.0d0
+       rij_inv = 1.0d0 / elec_dist(i, j)
        do ii = 1, 3
           ! \frac{x-x0}{\sqrt{c+(x-x0)^2}}
           elec_dist_deriv_e(ii, i, j) = (elec_coord(i, ii) - elec_coord(j, ii)) * rij_inv
-          ! 1 / \sqrt{c+(x-x0)^2} - (x-x0)^2 /\left(c+(x-x0)^2\right)^{3/2}
-          lap = lap + rij_inv - elec_dist_deriv_e(ii, i, j) * elec_dist_deriv_e(ii, i, j) * rij_inv
        end do
-       elec_dist_deriv_e(4, i, j) = lap
-       elec_dist_deriv_e(:, i, i) = 0.0d0
+       elec_dist_deriv_e(4, i, j) = 2.d0 * rij_inv
     end do
+    elec_dist_deriv_e(:, j, j) = 0.0d0
  end do
 
 END_PROVIDER

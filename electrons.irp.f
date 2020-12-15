@@ -48,6 +48,7 @@ BEGIN_PROVIDER [ double precision, elec_dist, (nelec, nelec) ]
        z = elec_coord(i, 3) - elec_coord(j, 3)
        elec_dist(i, j) = dsqrt( x*x + y*y + z*z )
     enddo
+!    elec_dist(j, j) = 1.d-10
  enddo
 END_PROVIDER
 
