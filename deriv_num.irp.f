@@ -1,9 +1,9 @@
 program jastrow
   implicit none
-  print *, 'Nabla Jeen'
+  print *, 'Derivatives test'
   integer :: k
   double precision :: j1, j2, j0, deriv, dt, lapl
-  dt = 1.0d-5
+  dt = 1.0d-4
 
 BEGIN_TEMPLATE 
 lapl = 0.0d0
@@ -35,11 +35,14 @@ print *, $X_deriv_e(4, $Z)
 print *, ''
 
 SUBST [X, Y, Z]
-factor_een ; ; 1;;
+factor_en ; ; 1;;
 END_TEMPLATE
+!factor_een ; ; 1;;
 !rescale_een_e ; (1,3,1) ; 1,3,1 ;;
 !rescale_een_n ; (1,1,2) ; 1,1,2 ;;
 !rescale_een_e ; (1, 2, 2) ; 1, 2, 2 ;;
+!factor_en ; ; 1;;
+!rescale_en ; (1, 2) ; 1, 2 ;;
 !elnuc_dist ; (1,1); 1,1 ;;
 !elec_dist  ; (1,2); 1,2 ;;
 

@@ -58,23 +58,76 @@ BEGIN_PROVIDER [double precision, factor_en]
  BEGIN_DOC
  ! Electron-nuclei contribution to Jastrow factor
  END_DOC
- integer :: i, j, p, q
+ integer :: i, a, p, q
  double precision :: pow_ser, x
 
  factor_en = 0.0d0
 
- do j = 1 , nnuc
+ do a = 1 , nnuc
     do i = 1, nelec
-       x = rescale_en(i, j) 
+       x = rescale_en(i, a) 
        pow_ser = 0.0d0
 
        do p = 2, naord
-          x = x * rescale_en(i, j) 
-          pow_ser = pow_ser + aord_vect(p + 1, typenuc_arr(j)) * x
+          x = x * rescale_en(i, a) 
+          pow_ser = pow_ser + aord_vect(p + 1, typenuc_arr(a)) * x
        end do
 
-       factor_en = factor_en + aord_vect(1, typenuc_arr(j)) * rescale_en(i, j) &
-            / (1 + aord_vect(2, typenuc_arr(j)) * rescale_en(i, j)) + pow_ser
+       factor_en = factor_en + aord_vect(1, typenuc_arr(a)) * rescale_en(i, a) &
+            / (1.0d0 + aord_vect(2, typenuc_arr(a)) * rescale_en(i, a)) + pow_ser
+
+    end do
+ end do
+
+END_PROVIDER
+
+BEGIN_PROVIDER [double precision, factor_en_deriv_e, (4, nelec) ]
+ implicit none
+ BEGIN_DOC
+ ! Dimensions 1-3 : dx, dy, dz
+ ! Dimension 4 : d2x + d2y + d2z
+ END_DOC
+ integer :: i, ii, a, p, q
+ double precision :: x, x_inv, y, den, invden, lap1, lap2
+ double precision, dimension(4) :: dx, pow_ser_g
+
+ factor_en_deriv_e = 0.0d0
+
+ do a = 1 , nnuc
+    do i = 1, nelec
+       pow_ser_g = 0.0d0
+       den = 1.0d0 + aord_vect(2, typenuc_arr(a)) * rescale_en(i, a)
+       invden = 1.0d0 / den
+
+       do ii = 1, 4
+          dx(ii) = rescale_en_deriv_e(ii, i, a)
+       enddo
+
+       lap1 = 0.0d0
+       lap2 = 0.0d0
+       do ii = 1, 3
+          x = rescale_en(i, a)
+          x_inv = 1.0d0 / x
+          do p = 2, naord
+             pow_ser_g(ii) += p * aord_vect(p + 1, typenuc_arr(a)) * x * dx(ii)
+             pow_ser_g(4) += p * (p - 1) * aord_vect(p + 1, typenuc_arr(a)) * x * x_inv * dx(ii) * dx(ii)
+             lap2 += p * aord_vect(p + 1, typenuc_arr(a)) * x
+             x = x * rescale_en(i, a) 
+          end do
+
+          ! (a1 (-2 a2 r'[i,a]^2+(1+a2 r[i,a]) r''[i,a]))/(1+a2 r[i,a])^3
+          lap1 += -2.0d0 * aord_vect(2, typenuc_arr(a)) * dx(ii) * dx(ii)
+
+          ! \frac{\text{a1} r'(i,a)}{(\text{a2} r(i,a)+1)^2}
+          factor_en_deriv_e(ii, i) += aord_vect(1, typenuc_arr(a)) &
+               * dx(ii) * invden * invden + pow_ser_g(ii)
+       enddo
+
+       ii = 4
+       lap1 += den * dx(ii)
+       lap1 = lap1 * aord_vect(1, typenuc_arr(a)) * invden * invden * invden
+       pow_ser_g(ii) += lap1 + lap2 * dx(ii)
+       factor_en_deriv_e(ii, i) += pow_ser_g(ii)
 
     end do
  end do

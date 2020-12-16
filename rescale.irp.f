@@ -33,13 +33,40 @@ BEGIN_PROVIDER [ double precision, rescale_en, (nelec, nnuc) ]
  BEGIN_DOC
  ! R = (1 - exp(-kappa r))/kappa for electron-nucleus for $J_{en}$
  END_DOC
- integer :: i, j
+ integer :: i, a
 
- do j = 1, nnuc
+ do a = 1, nnuc
     do i = 1, nelec
-       rescale_en(i, j) = (1.d0 - dexp(-kappa * elnuc_dist(i, j))) * kappa_inv
+       rescale_en(i, a) = (1.0d0 - dexp(-kappa * elnuc_dist(i, a))) * kappa_inv
     enddo
  enddo
+END_PROVIDER
+
+BEGIN_PROVIDER [ double precision, rescale_en_deriv_e, (4, nelec, nnuc) ]
+ implicit none
+ BEGIN_DOC
+ ! R = (1 - exp(-kappa r))/kappa derived wrt x
+ ! Dimensions 1-3 : dx, dy, dz
+ ! Dimension 4 : d2x + d2y + d2z
+ END_DOC
+ integer :: i, ii, a
+
+ do a = 1, nnuc
+    do i = 1, nelec
+       do ii = 1, 4
+          rescale_en_deriv_e(ii, i, a) = elnuc_dist_deriv_e(ii, i, a)
+       end do
+       rescale_en_deriv_e(4, i, a) = rescale_en_deriv_e(4, i, a) + &
+       (-kappa * rescale_en_deriv_e(1, i, a) * rescale_en_deriv_e(1, i, a)) + &
+       (-kappa * rescale_en_deriv_e(2, i, a) * rescale_en_deriv_e(2, i, a)) + &
+       (-kappa * rescale_en_deriv_e(3, i, a) * rescale_en_deriv_e(3, i, a))
+       do ii = 1, 4
+          rescale_en_deriv_e(ii, i, a) = rescale_en_deriv_e(ii, i, a) &
+               * dexp(-kappa * elnuc_dist(i, a))
+       enddo
+    enddo
+ enddo
+
 END_PROVIDER
 
 BEGIN_PROVIDER [double precision, rescale_een_e, (nelec, nelec, 0:ncord)]
