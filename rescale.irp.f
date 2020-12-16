@@ -132,19 +132,16 @@ BEGIN_PROVIDER [double precision, elnuc_dist_deriv_e, (4, nelec, nnuc)]
  END_DOC
  implicit none
  integer :: i, ii, a
- double precision :: ria_inv, lap
+ double precision :: ria_inv
 
  do a = 1, nnuc 
     do i = 1, nelec
        ria_inv = 1.0d0 / elnuc_dist(i, a)
-       lap = 0.0d0
        do ii = 1, 3
           ! \frac{x-x0}{\sqrt{c+(x-x0)^2}}
           elnuc_dist_deriv_e(ii, i, a) = (elec_coord(i, ii) - nuc_coord(a, ii)) * ria_inv
-          ! 1 / \sqrt{c+(x-x0)^2} - (x-x0)^2 /\left(c+(x-x0)^2\right)^{3/2}
-          lap = lap + ria_inv - elnuc_dist_deriv_e(ii, i, a) * elnuc_dist_deriv_e(ii, i, a) * ria_inv
        end do
-       elnuc_dist_deriv_e(4, i, a) = lap
+       elnuc_dist_deriv_e(4, i, a) = 2.0d0 * ria_inv
     end do
  end do
 END_PROVIDER
@@ -192,7 +189,7 @@ BEGIN_PROVIDER [double precision, elec_dist_deriv_e, (4, nelec, nelec)]
  END_DOC
  implicit none
  integer :: i, ii, j
- double precision :: rij_inv, lap
+ double precision :: rij_inv
 
  do j = 1, nelec
     do i = 1, nelec
@@ -201,7 +198,7 @@ BEGIN_PROVIDER [double precision, elec_dist_deriv_e, (4, nelec, nelec)]
           ! \frac{x-x0}{\sqrt{c+(x-x0)^2}}
           elec_dist_deriv_e(ii, i, j) = (elec_coord(i, ii) - elec_coord(j, ii)) * rij_inv
        end do
-       elec_dist_deriv_e(4, i, j) = 2.d0 * rij_inv
+       elec_dist_deriv_e(4, i, j) = 2.0d0 * rij_inv
     end do
     elec_dist_deriv_e(:, j, j) = 0.0d0
  end do

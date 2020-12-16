@@ -28,9 +28,7 @@ BEGIN_PROVIDER [ double precision, factor_een ]
                    rial = rescale_een_n(i, a, l)
                    riam = rescale_een_n(i, a, m)
                    rijk = rescale_een_e(i, j, k)
-                   factor_een = factor_een + &
-!                                  rijk * (rial + rjal) * riam * rjam_cn
-                                  rijk  * rjam_cn
+                   factor_een = factor_een + rijk * (rial + rjal) * riam * rjam_cn
                 enddo
              enddo
           enddo
@@ -48,7 +46,7 @@ BEGIN_PROVIDER [ double precision, factor_een_deriv_e, (4, nelec) ]
  END_DOC
  integer :: i, ii, j, a, p, k, l, lmax, m
  double precision :: riam, rjam_cn, rial, rjal, rijk
- double precision, dimension(4) :: driam, drjam_cn, drial, drjal, drijk, x
+ double precision, dimension(4) :: driam, drjam_cn, drial, drjal, drijk
  double precision :: cn, v1, v2, d1, d2, lap
 
  factor_een_deriv_e = 0.0d0
@@ -86,28 +84,22 @@ BEGIN_PROVIDER [ double precision, factor_een_deriv_e, (4, nelec) ]
                       drijk(ii) = rescale_een_e_deriv_e(ii, j, i, k)
                    enddo
 
-                   lap = 0.0d0
-                   x(1:3) = 0.0d0
-                   x(4) = 2.0d0
                    v1 = rijk * (rial + rjal)
                    v2 = rjam_cn * riam
 
+                   lap = 0.0d0
                    do ii = 1, 3
-                      d1 = drijk(ii) * (rial + rjal) + rijk * (rial + drjal(ii))
+                      d1 = drijk(ii) * (rial + rjal) + rijk * drjal(ii)
                       d2 = drjam_cn(ii) * riam
-                      factor_een_deriv_e(ii, j) = factor_een_deriv_e(ii, j) + &
-                         v1 * d2 + d1 * v2
-!                      factor_een_deriv_e(ii, j) = factor_een_deriv_e(ii, j) + &
-!                         drijk(ii)
                       lap = lap + d1 * d2
+                      factor_een_deriv_e(ii, j) += v1 * d2 + d1 * v2
                    enddo
 
-                   ii = 4
-                   d1 = drijk(ii) * (rial + rjal) + rijk * (rial + drjal(ii))
-                   d2 = drjam_cn(ii) * riam
-                   factor_een_deriv_e(ii, j) = factor_een_deriv_e(ii, j) + &
-                         v1 * d2 + d1 * v2 + x(ii) * lap
                    ! v(x) u''(x) + 2 * u'(x) v'(x) + u(x) v''(x)
+                   ii = 4
+                   d1 = drijk(ii) * (rial + rjal) + rijk * drjal(ii)
+                   d2 = drjam_cn(ii) * riam
+                   factor_een_deriv_e(ii, j) += v1 * d2 + d1 * v2 + 2.0d0 * lap
 
                 enddo
              enddo

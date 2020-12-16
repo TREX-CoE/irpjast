@@ -1,11 +1,8 @@
 IRPF90 = irpf90  #-a -d
-FC     = gfortran -g
+FC     = gfortran
 FCFLAGS= -O2 -ffree-line-length-none -I .
-FC     = ifort -C -traceback -g
-#FCFLAGS= -O2 -ffree-line-length-none -I .
-#NINJA  = ninja
+NINJA  = ninja
 AR     = ar
-ARCHIVE= ar crs
 RANLIB = ranlib
 
 SRC=
