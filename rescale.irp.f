@@ -28,6 +28,32 @@ BEGIN_PROVIDER [ double precision, rescale_ee, (nelec, nelec) ]
  enddo
 END_PROVIDER
 
+BEGIN_PROVIDER [ double precision, rescale_ee_deriv_e, (4, nelec, nelec) ]
+ implicit none
+ BEGIN_DOC
+ ! R = (1 - exp(-kappa r))/kappa derived wrt x
+ ! Dimensions 1-3 : dx, dy, dz
+ ! Dimension 4 : d2x + d2y + d2z
+ END_DOC
+ integer :: i, j, ii
+
+ do j = 1, nelec
+    do i = 1, nelec
+       do ii = 1, 4
+          rescale_ee_deriv_e(ii, i, j) = elec_dist_deriv_e(ii, i, j)
+       end do
+       rescale_ee_deriv_e(4, i, j) = rescale_ee_deriv_e(4, i, j) + &
+       (-kappa * rescale_ee_deriv_e(1, i, j) * rescale_ee_deriv_e(1, i, j)) + &
+       (-kappa * rescale_ee_deriv_e(2, i, j) * rescale_ee_deriv_e(2, i, j)) + &
+       (-kappa * rescale_ee_deriv_e(3, i, j) * rescale_ee_deriv_e(3, i, j))
+       do ii = 1, 4
+          rescale_ee_deriv_e(ii, i, j) = rescale_ee_deriv_e(ii, i, j) &
+               * dexp(-kappa * elec_dist(i, j))
+       enddo
+    enddo
+ enddo
+END_PROVIDER
+
 BEGIN_PROVIDER [ double precision, rescale_en, (nelec, nnuc) ]
  implicit none
  BEGIN_DOC
@@ -66,7 +92,6 @@ BEGIN_PROVIDER [ double precision, rescale_en_deriv_e, (4, nelec, nnuc) ]
        enddo
     enddo
  enddo
-
 END_PROVIDER
 
 BEGIN_PROVIDER [double precision, rescale_een_e, (nelec, nelec, 0:ncord)]
