@@ -35,7 +35,7 @@ print *, $X_deriv_e(4, $Z)
 print *, ''
 
 SUBST [X, Y, Z]
-factor_en ; ; 1;;
+factor_ee ; ; 1;;
 END_TEMPLATE
 !factor_een ; ; 1;;
 !rescale_een_e ; (1,3,1) ; 1,3,1 ;;
@@ -43,6 +43,8 @@ END_TEMPLATE
 !rescale_een_e ; (1, 2, 2) ; 1, 2, 2 ;;
 !factor_en ; ; 1;;
 !rescale_en ; (1, 2) ; 1, 2 ;;
+!factor_ee ; ; 1;;
+!rescale_ee ; (1, 2) ; 1, 2 ;;
 !elnuc_dist ; (1,1); 1,1 ;;
 !elec_dist  ; (1,2); 1,2 ;;
 
