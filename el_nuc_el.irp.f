@@ -41,8 +41,8 @@ END_PROVIDER
 BEGIN_PROVIDER [ double precision, factor_een_deriv_e, (4, nelec) ]
  implicit none
  BEGIN_DOC
- ! Dimensions 1-3 : dx, dy, dz
- ! Dimension 4 : d2x + d2y + d2z
+ ! Dimensions 1-3: dx, dy, dz
+ ! Dimension 4: d2x + d2y + d2z
  END_DOC
  integer :: i, ii, j, a, p, k, l, lmax, m
  double precision :: riam, rjam_cn, rial, rjal, rijk

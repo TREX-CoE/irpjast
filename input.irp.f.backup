@@ -1,0 +1,58 @@
+BEGIN_PROVIDER [ double precision, elec_coord, (nelec, 3) ]
+ implicit none
+ BEGIN_DOC
+ ! Electron coordinates
+ END_DOC
+ character(len=*), parameter :: FILE_NAME = "elec_coord.txt"
+ integer :: fu, rc, i, j
+
+ open(action='read', file=FILE_NAME, iostat=rc, newunit=fu)
+
+ do i = 1, nelec
+    read(fu, *) elec_coord(i, :)
+ end do
+
+ close(fu)
+
+END_PROVIDER
+
+BEGIN_PROVIDER [ double precision, nuc_coord, (nnuc, 3) ]
+ implicit none
+ BEGIN_DOC
+ ! Nuclei coordinates
+ END_DOC
+ character(len=*), parameter :: FILE_NAME = "geometry.txt"
+ integer :: fu, rc, i
+ 
+ open(action='read', file=FILE_NAME, iostat=rc, newunit=fu)
+
+ do i = 1, nnuc
+    read(fu, *) nuc_coord(i, :)
+ end do
+ 
+ close(fu)
+
+END_PROVIDER
+
+BEGIN_PROVIDER [double precision, aord_vect, (naord + 1, typenuc)]
+&BEGIN_PROVIDER [double precision, bord_vect, (nbord + 1)]
+&BEGIN_PROVIDER [double precision, cord_vect, (dim_cord_vect, typenuc)]
+ implicit none
+ BEGIN_DOC
+ ! Read Jastow coefficients from file
+ END_DOC
+ PROVIDE naord
+ PROVIDE nbord
+ PROVIDE ncord
+ character(len=*), parameter :: FILE_NAME = "jast_coeffs.txt"
+ integer :: i, fu, rc
+ 
+ open(action='read', file=FILE_NAME, iostat=rc, newunit=fu)
+ 
+ read(fu, *) aord_vect
+ read(fu, *) bord_vect
+ read(fu, *) cord_vect
+ 
+ close(fu)
+
+END_PROVIDER

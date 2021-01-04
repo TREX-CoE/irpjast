@@ -14,25 +14,6 @@ BEGIN_PROVIDER [ integer, nelec_up ]
  nelec_up = 5
 END_PROVIDER
 
-
-BEGIN_PROVIDER [ double precision, elec_coord, (nelec, 3) ]
- implicit none
- BEGIN_DOC
- ! Electron coordinates
- END_DOC
- character(len=*), parameter :: FILE_NAME = "elec_coord.txt"
- integer :: fu, rc, i, j
-
- open(action='read', file=FILE_NAME, iostat=rc, newunit=fu)
-
- do i = 1, nelec
-    read(fu, *) elec_coord(i, :)
- end do
-
- close(fu)
-
-END_PROVIDER
-
 BEGIN_PROVIDER [ double precision, elec_dist, (nelec, nelec) ]
  implicit none
  BEGIN_DOC

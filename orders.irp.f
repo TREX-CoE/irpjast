@@ -45,30 +45,6 @@ BEGIN_PROVIDER [integer, dim_cord_vect]
  end do
 
 END_PROVIDER
- 
-
-BEGIN_PROVIDER [double precision, aord_vect, (naord + 1, typenuc)]
-&BEGIN_PROVIDER [double precision, bord_vect, (nbord + 1)]
-&BEGIN_PROVIDER [double precision, cord_vect, (dim_cord_vect, typenuc)]
- implicit none
- BEGIN_DOC
- ! Read Jastow coefficients from file
- END_DOC
- PROVIDE naord
- PROVIDE nbord
- PROVIDE ncord
- character(len=*), parameter :: FILE_NAME = "jast_coeffs.txt"
- integer :: i, fu, rc
- 
- open(action='read', file=FILE_NAME, iostat=rc, newunit=fu)
- 
- read(fu, *) aord_vect
- read(fu, *) bord_vect
- read(fu, *) cord_vect
- 
- close(fu)
-
-END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, cord_vect_lkp, (0:ncord-1, 0:ncord-1, 2:ncord, typenuc) ]
  implicit none

@@ -17,25 +17,6 @@ BEGIN_PROVIDER [ integer, typenuc ]
  typenuc_arr = (/1, 1/)
 END_PROVIDER
 
-
-BEGIN_PROVIDER [ double precision, nuc_coord, (nnuc, 3) ]
- implicit none
- BEGIN_DOC
- ! Nuclei coordinates
- END_DOC
- character(len=*), parameter :: FILE_NAME = "geometry.txt"
- integer :: fu, rc, i
- 
- open(action='read', file=FILE_NAME, iostat=rc, newunit=fu)
-
- do i = 1, nnuc
-    read(fu, *) nuc_coord(i, :)
- end do
- 
- close(fu)
-
-END_PROVIDER
-
 BEGIN_PROVIDER [ double precision, elnuc_dist, (nelec, nnuc) ]
  implicit none
  BEGIN_DOC
