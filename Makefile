@@ -1,8 +1,9 @@
-IRPF90 = irpf90  #-a -d
-FC     = gfortran
+IRPF90 = irpf90 --codelet=factor_een:100000 #-a -d
+FC     = ifort -xHost -g
 FCFLAGS= -O2 -ffree-line-length-none -I .
 NINJA  = ninja
-AR     = ar
+AR = ar 
+ARCHIVE = ar crs
 RANLIB = ranlib
 
 SRC=
