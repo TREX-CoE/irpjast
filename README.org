@@ -1,0 +1,4 @@
+* Interfacing with CHAMP
+In this branch the interfacing of the IRP Jastrow with CHAMP is implemented. It includes
+and external subroutine (=jastrow_transirp.f=) and two header files (=vmc.h= and =force.h=)
+that are part of CHAMP's source code.
