@@ -20,11 +20,15 @@ BEGIN_PROVIDER [ double precision, rescale_ee, (nelec, nelec) ]
  ! R = (1 - exp(-kappa r))/kappa for electron-electron for $J_{ee}$
  END_DOC
  integer :: i, j
+ double precision :: x
 
  do j = 1, nelec
-    do i = 1, nelec
-       rescale_ee(i, j) = (1.0d0 - dexp(-kappa * elec_dist(i, j))) * kappa_inv
+    do i = 1, j-1
+       x = (1.0d0 - dexp(-kappa * elec_dist(i, j))) * kappa_inv
+       rescale_ee(i, j) = x
+       rescale_ee(j, i) = x
     enddo
+    rescale_ee(j, j) = 0.d0
  enddo
 END_PROVIDER
 
@@ -36,9 +40,11 @@ BEGIN_PROVIDER [ double precision, rescale_ee_deriv_e, (4, nelec, nelec) ]
  ! Dimension 4 : d2x + d2y + d2z
  END_DOC
  integer :: i, j, ii
+ double precision :: f
 
  do j = 1, nelec
     do i = 1, nelec
+       f = 1.d0 - kappa*rescale_ee(i,j) ! == dexp(-kappa * elec_dist(i, j))
        do ii = 1, 4
           rescale_ee_deriv_e(ii, i, j) = elec_dist_deriv_e(ii, i, j)
        end do
@@ -48,7 +54,7 @@ BEGIN_PROVIDER [ double precision, rescale_ee_deriv_e, (4, nelec, nelec) ]
        (-kappa * rescale_ee_deriv_e(3, i, j) * rescale_ee_deriv_e(3, i, j))
        do ii = 1, 4
           rescale_ee_deriv_e(ii, i, j) = rescale_ee_deriv_e(ii, i, j) &
-               * dexp(-kappa * elec_dist(i, j))
+               * f
        enddo
     enddo
  enddo
@@ -76,9 +82,11 @@ BEGIN_PROVIDER [ double precision, rescale_en_deriv_e, (4, nelec, nnuc) ]
  ! Dimension 4 : d2x + d2y + d2z
  END_DOC
  integer :: i, ii, a
+ double precision :: f
 
  do a = 1, nnuc
     do i = 1, nelec
+       f = 1.d0 - kappa*rescale_en(i,a) ! == dexp(-kappa * elnuc_dist(i, a))
        do ii = 1, 4
           rescale_en_deriv_e(ii, i, a) = elnuc_dist_deriv_e(ii, i, a)
        end do
@@ -88,7 +96,7 @@ BEGIN_PROVIDER [ double precision, rescale_en_deriv_e, (4, nelec, nnuc) ]
        (-kappa * rescale_en_deriv_e(3, i, a) * rescale_en_deriv_e(3, i, a))
        do ii = 1, 4
           rescale_en_deriv_e(ii, i, a) = rescale_en_deriv_e(ii, i, a) &
-               * dexp(-kappa * elnuc_dist(i, a))
+               * f
        enddo
     enddo
  enddo
@@ -100,18 +108,28 @@ BEGIN_PROVIDER [double precision, rescale_een_e, (nelec, nelec, 0:ncord)]
  ! R = exp(-kappa r) for electron-electron for $J_{een}$
  END_DOC
  integer :: i, j, l
- double precision :: kappa_l
+ double precision :: x
+ double precision, parameter :: f = dexp(1.d0)
 
- do l = 0, ncord
-    kappa_l = -dble(l) * kappa
-    do j = 1, nelec
-       do i = 1, nelec
-          rescale_een_e(i, j, l) = kappa_l * elec_dist(i, j)
-       enddo
+ rescale_een_e(:, :, 0) = 1.d0
+
+ do j = 1, nelec
+    do i = 1, j-1
+       x = dexp(-kappa * elec_dist(i, j))
+       rescale_een_e(i, j, 1) = x
+       rescale_een_e(j, i, 1) = x
     enddo
  enddo
 
- rescale_een_e = dexp(rescale_een_e)
+ do l = 2, ncord
+    do j = 1, nelec
+       do i = 1, j-1
+          x = rescale_een_e(i, j, l-1) * rescale_een_e(i, j, 1)
+          rescale_een_e(i, j, l) = x
+          rescale_een_e(j, i, l) = x
+       enddo
+    enddo
+ enddo
 
  do l = 0, ncord
     do j = 1, nelec
@@ -126,18 +144,24 @@ BEGIN_PROVIDER [double precision, rescale_een_n, (nelec, nnuc, 0:ncord)]
  ! R = exp(-kappa r) for electron-electron for $J_{een}$
  END_DOC
  integer :: i, a, l
- double precision :: kappa_l
+ double precision :: x
+ double precision, parameter :: f = dexp(1.d0)
 
- do l = 0, ncord
-    kappa_l = - dble(l) * kappa
-    do a = 1, nnuc
-       do i = 1, nelec
-          rescale_een_n(i, a, l) = kappa_l * elnuc_dist(i, a)
-       enddo
+ rescale_een_n(:,:,0) = 1.d0
+
+ do a = 1, nnuc
+    do i = 1, nelec
+       rescale_een_n(i, a, 1) = dexp(-kappa * elnuc_dist(i, a))
     enddo
  enddo
 
- rescale_een_n = dexp(rescale_een_n)
+ do l = 2, ncord
+    do a = 1, nnuc
+       do i = 1, nelec
+          rescale_een_n(i, a, l) = rescale_een_n(i, a, l-1) * rescale_een_n(i, a, 1)
+       enddo
+    enddo
+ enddo
 
 END_PROVIDER
 
@@ -186,7 +210,7 @@ BEGIN_PROVIDER [double precision, elnuc_dist_deriv_e, (4, nelec, nnuc)]
  integer :: i, ii, a
  double precision :: ria_inv
 
- do a = 1, nnuc 
+ do a = 1, nnuc
     do i = 1, nelec
        ria_inv = 1.0d0 / elnuc_dist(i, a)
        do ii = 1, 3
@@ -207,6 +231,7 @@ BEGIN_PROVIDER [double precision, rescale_een_e_deriv_e, (4, nelec, nelec, 0:nco
  integer :: i, ii, j, l
  double precision :: kappa_l
 
+ !TODO: Check if rescale_een_e_deriv_e(:,:,0) = 0.d0
  do l = 0, ncord
     kappa_l = - dble(l) * kappa
     do j = 1, nelec
@@ -232,7 +257,7 @@ BEGIN_PROVIDER [double precision, rescale_een_e_deriv_e, (4, nelec, nelec, 0:nco
     enddo
  enddo
 END_PROVIDER
- 
+
 BEGIN_PROVIDER [double precision, elec_dist_deriv_e, (4, nelec, nelec)]
  BEGIN_DOC
  ! Derivative of R_{ij} wrt x

@@ -4,7 +4,7 @@ BEGIN_PROVIDER [ double precision, factor_een ]
  ! ElectronE-electron-nuclei contribution to Jastrow factor
  END_DOC
  integer :: i, j, a, p, k, l, lmax, m
- double precision :: riam, rjam_cn, rial, rjal, rijk
+ double precision :: rjam_cn
  double precision :: cn
 
  factor_een = 0.0d0
@@ -21,14 +21,16 @@ BEGIN_PROVIDER [ double precision, factor_een ]
           m = (p - k - l) / 2
           do a = 1, nnuc
              cn = cord_vect_lkp(l, k, p, typenuc_arr(a))
-             do j = 1, nelec
-                rjal = rescale_een_n(j, a, l)
+             rjam_cn = rescale_een_n(2, a, m) * cn
+             factor_een = factor_een + rescale_een_e(1,2,k) * &
+              (rescale_een_n(1,a,l) + rescale_een_n(2,a,l)) * &
+               rescale_een_n(1,a,m) * rjam_cn
+             do j = 3, nelec
                 rjam_cn = rescale_een_n(j, a, m) * cn
                 do i = 1, j - 1
-                   rial = rescale_een_n(i, a, l)
-                   riam = rescale_een_n(i, a, m)
-                   rijk = rescale_een_e(i, j, k)
-                   factor_een = factor_een + rijk * (rial + rjal) * riam * rjam_cn
+                   factor_een = factor_een + rescale_een_e(i,j,k) * &
+                    (rescale_een_n(i,a,l) + rescale_een_n(j,a,l)) * &
+                     rescale_een_n(i,a,m) * rjam_cn
                 enddo
              enddo
           enddo
