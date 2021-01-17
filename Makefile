@@ -1,12 +1,12 @@
 IRPF90 = irpf90  #-a -d
-FC     = ifort
-FCFLAGS= -O2 -I .
+FC     = gfortran
+FCFLAGS= -O2 -ffree-line-length-none -I .
 NINJA  = ninja
 ARCHIVE= ar crs
 RANLIB = ranlib
 
-SRC=inputs.f90
-OBJ=
+SRC=jastrow_transirp.f
+OBJ=jastrow_transirp.o
 LIB=
 
 -include irpf90.make

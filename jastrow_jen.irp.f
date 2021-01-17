@@ -1,22 +1,3 @@
-BEGIN_PROVIDER [ integer, nnuc ]
- implicit none
- BEGIN_DOC
- ! Number of nuclei
- END_DOC
- nnuc = 2
-END_PROVIDER
-
-
-BEGIN_PROVIDER [ integer, typenuc ]
-&BEGIN_PROVIDER [integer, typenuc_arr, (nnuc)]
- implicit none
- BEGIN_DOC
- ! Type of the nuclei
- END_DOC
- typenuc = 1
- typenuc_arr = (/1, 1/)
-END_PROVIDER
-
 BEGIN_PROVIDER [ double precision, elnuc_dist, (nelec, nnuc) ]
  implicit none
  BEGIN_DOC
@@ -40,18 +21,16 @@ BEGIN_PROVIDER [double precision, factor_en]
  ! Electron-nuclei contribution to Jastrow factor
  END_DOC
  integer :: i, a, p
- double precision :: pow_ser, x
+ double precision :: pow_ser
 
  factor_en = 0.0d0
 
  do a = 1 , nnuc
     do i = 1, nelec
-       x = rescale_en(i, a) 
        pow_ser = 0.0d0
 
        do p = 2, naord
-          x = x * rescale_en(i, a) 
-          pow_ser = pow_ser + aord_vect(p + 1, typenuc_arr(a)) * x
+          pow_ser = pow_ser + aord_vect(p + 1, typenuc_arr(a)) * rescale_en_stored(p, i, a)
        end do
 
        factor_en = factor_en + aord_vect(1, typenuc_arr(a)) * rescale_en(i, a) &
@@ -69,7 +48,7 @@ BEGIN_PROVIDER [double precision, factor_en_deriv_e, (4, nelec) ]
  ! Dimension 4 : d2x + d2y + d2z
  END_DOC
  integer :: i, ii, a, p
- double precision :: x, x_inv, y, den, invden, lap1, lap2, lap3, third
+ double precision :: y, den, invden, lap1, lap2, lap3, third
  double precision, dimension(3) :: pow_ser_g
  double precision, dimension(4) :: dx
 
@@ -81,7 +60,6 @@ BEGIN_PROVIDER [double precision, factor_en_deriv_e, (4, nelec) ]
        pow_ser_g = 0.0d0
        den = 1.0d0 + aord_vect(2, typenuc_arr(a)) * rescale_en(i, a)
        invden = 1.0d0 / den
-       x_inv = 1.0d0 / rescale_en(i, a)
 
        do ii = 1, 4
           dx(ii) = rescale_en_deriv_e(ii, i, a)
@@ -91,16 +69,15 @@ BEGIN_PROVIDER [double precision, factor_en_deriv_e, (4, nelec) ]
        lap2 = 0.0d0
        lap3 = 0.0d0
        do ii = 1, 3
-          x = rescale_en(i, a)
           do p = 2, naord
              ! p a_{p+1} r[i,a]^(p-1)
-             y = p * aord_vect(p + 1, typenuc_arr(a)) * x
+             y = p * aord_vect(p + 1, typenuc_arr(a)) * rescale_en_stored(p - 1, i, a)
              pow_ser_g(ii) += y * dx(ii)
              ! (p-1) p a_{p+1} r[i,a]^(p-2) r'[i,a]^2
-             lap1 += (p - 1) * y * x_inv * dx(ii) * dx(ii)
+             lap1 += (p - 1) * p * aord_vect(p + 1, typenuc_arr(a)) * &
+		     rescale_en_stored(p - 2, i, a) * dx(ii) * dx(ii)
              ! p a_{p+1} r[i,a]^(p-1) r''[i,a]
              lap2 += y
-             x = x * rescale_en(i, a)
           end do
 
           ! (a1 (-2 a2 r'[i,a]^2+(1+a2 r[i,a]) r''[i,a]))/(1+a2 r[i,a])^3

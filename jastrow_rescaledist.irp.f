@@ -28,6 +28,26 @@ BEGIN_PROVIDER [ double precision, rescale_ee, (nelec, nelec) ]
  enddo
 END_PROVIDER
 
+BEGIN_PROVIDER [double precision, rescale_ee_stored, (0:nbord, nelec, nelec)]
+ implicit none
+ BEGIN_DOC
+ ! Stores the powers of the rescaled r_ee
+ END_DOC
+ integer :: i, j, p
+ double precision :: x
+
+ do j = 1, nelec
+    do i = 1, nelec
+       x = 1.0d0
+       do p = 0, nbord
+          rescale_ee_stored(p, i, j) = x
+          x = x * rescale_ee(i, j)
+       end do
+    enddo
+ enddo
+
+END_PROVIDER
+
 BEGIN_PROVIDER [ double precision, rescale_ee_deriv_e, (4, nelec, nelec) ]
  implicit none
  BEGIN_DOC
@@ -66,6 +86,26 @@ BEGIN_PROVIDER [ double precision, rescale_en, (nelec, nnuc) ]
        rescale_en(i, a) = (1.0d0 - dexp(-kappa * elnuc_dist(i, a))) * kappa_inv
     enddo
  enddo
+END_PROVIDER
+
+BEGIN_PROVIDER [double precision, rescale_en_stored, (0:naord, nelec, nnuc)]
+ implicit none
+ BEGIN_DOC
+ ! Stores the powers of the rescaled r_ee
+ END_DOC
+ integer :: i, a, p
+ double precision :: x
+
+ do a = 1, nnuc
+    do i = 1, nelec
+       x = 1.0d0
+       do p = 0, naord
+          rescale_en_stored(p, i, a) = x
+          x = x * rescale_en(i, a)
+       end do
+    enddo
+ enddo
+
 END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, rescale_en_deriv_e, (4, nelec, nnuc) ]

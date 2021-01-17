@@ -1,3 +1,55 @@
+BEGIN_PROVIDER [ integer, nelec ]
+ implicit none
+ BEGIN_DOC
+ ! Number of electrons
+ END_DOC
+ nelec = 10
+END_PROVIDER
+
+BEGIN_PROVIDER [ integer, nelec_up ]
+ implicit none
+ BEGIN_DOC
+ ! Number of alpha and beta electrons
+ END_DOC
+ nelec_up = 5
+END_PROVIDER
+
+BEGIN_PROVIDER [ double precision, elec_coord, (nelec, 3) ]
+ implicit none
+ BEGIN_DOC
+ ! Electron coordinates
+ END_DOC
+ call jast_elec_champ(nelec, elec_coord)
+
+END_PROVIDER
+
+BEGIN_PROVIDER [ integer, nnuc ]
+ implicit none
+ BEGIN_DOC
+ ! Number of nuclei
+ END_DOC
+ nnuc = 2
+END_PROVIDER
+
+BEGIN_PROVIDER [ integer, typenuc ]
+&BEGIN_PROVIDER [integer, typenuc_arr, (nnuc)]
+ implicit none
+ BEGIN_DOC
+ ! Type of the nuclei
+ END_DOC
+ typenuc = 1
+ typenuc_arr = (/1, 1/)
+END_PROVIDER
+
+BEGIN_PROVIDER [ double precision, nuc_coord, (nnuc, 3) ]
+ implicit none
+ BEGIN_DOC
+ ! Nuclei coordinates
+ END_DOC
+ call jast_nuc_champ(nnuc, nuc_coord)
+
+END_PROVIDER
+
 BEGIN_PROVIDER [integer, naord]
  implicit none
  BEGIN_DOC
@@ -43,6 +95,17 @@ BEGIN_PROVIDER [integer, dim_cord_vect]
        end do
     end do
  end do
+
+END_PROVIDER
+ 
+BEGIN_PROVIDER [double precision, aord_vect, (naord + 1, typenuc)]
+&BEGIN_PROVIDER [double precision, bord_vect, (nbord + 1)]
+&BEGIN_PROVIDER [double precision, cord_vect, (dim_cord_vect, typenuc)]
+ implicit none
+ BEGIN_DOC
+ ! Read Jastow coefficients from file
+ END_DOC
+ call jast_pars_champ(naord, typenuc, aord_vect, nbord, bord_vect, dim_cord_vect, cord_vect)
 
 END_PROVIDER
 

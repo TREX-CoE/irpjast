@@ -1,19 +1,3 @@
-BEGIN_PROVIDER [ integer, nelec ]
- implicit none
- BEGIN_DOC
- ! Number of electrons
- END_DOC
- nelec = 10
-END_PROVIDER
-
-BEGIN_PROVIDER [ integer, nelec_up ]
- implicit none
- BEGIN_DOC
- ! Number of alpha and beta electrons
- END_DOC
- nelec_up = 5
-END_PROVIDER
-
 BEGIN_PROVIDER [ double precision, elec_dist, (nelec, nelec) ]
  implicit none
  BEGIN_DOC
@@ -60,20 +44,18 @@ BEGIN_PROVIDER [double precision, factor_ee]
  ! Electron-electron contribution to Jastrow factor
  END_DOC
  integer :: i, j, p, ipar
- double precision :: pow_ser, x, spin_fact
+ double precision :: pow_ser, spin_fact
 
  factor_ee = 0.0d0
 
  do j = 1, nelec
     do i = 1, j - 1
-       x = rescale_ee(i, j) 
        pow_ser = 0.0d0
        spin_fact = 1.0d0
        ipar = 1
 
        do p = 2, nbord
-          x = x * rescale_ee(i, j)
-          pow_ser = pow_ser + bord_vect(p + 1) * x
+          pow_ser = pow_ser + bord_vect(p + 1) * rescale_ee_stored(p, i, j)
        end do
 
        if (j.le.nelec_up .or. i.gt.nelec_up) then
@@ -96,7 +78,7 @@ BEGIN_PROVIDER [double precision, factor_ee_deriv_e, (4, nelec) ]
  ! Dimension 4 : d2x + d2y + d2z
  END_DOC
  integer :: i, ii, j, p
- double precision :: x, x_inv, y, den, invden, lap1, lap2, lap3, third, spin_fact
+ double precision :: y, den, invden, lap1, lap2, lap3, third, spin_fact
  double precision, dimension(3) :: pow_ser_g
  double precision, dimension(4) :: dx
 
@@ -109,7 +91,6 @@ BEGIN_PROVIDER [double precision, factor_ee_deriv_e, (4, nelec) ]
        spin_fact = 1.0d0
        den = 1.0d0 + bord_vect(2) * rescale_ee(i, j)
        invden = 1.0d0 / den
-       x_inv = 1.0d0 / (rescale_ee(i, j) + 1.0d-18)
 
        do ii = 1, 4
           dx(ii) = rescale_ee_deriv_e(ii, j, i)
@@ -124,16 +105,14 @@ BEGIN_PROVIDER [double precision, factor_ee_deriv_e, (4, nelec) ]
        lap2 = 0.0d0
        lap3 = 0.0d0
        do ii = 1, 3
-          x = rescale_ee(i, j)
           do p = 2, nbord
-             ! p a_{p+1} r[i,j]^(p-1)
-             y = p * bord_vect(p + 1) * x
+             ! p b_{p+1} r[i,j]^(p-1)
+	     y = p * bord_vect(p + 1) * rescale_ee_stored(p - 1, i, j)
              pow_ser_g(ii) += y * dx(ii)
-             ! (p-1) p a_{p+1} r[i,j]^(p-2) r'[i,j]^2
-             lap1 += (p - 1) * y * x_inv * dx(ii) * dx(ii)
+             ! (p-1) p b_{p+1} r[i,j]^(p-2) r'[i,j]^2
+             lap1 += (p - 1) * p * bord_vect(p + 1) * rescale_ee_stored(p - 2, i, j) * dx(ii) * dx(ii)
              ! p a_{p+1} r[i,j]^(p-1) r''[i,j]
              lap2 += y
-             x = x * rescale_ee(i, j)
           end do
 
           ! (a1 (-2 a2 r'[i,j]^2+(1+a2 r[i,j]) r''[i,j]))/(1+a2 r[i,j])^3
