@@ -197,7 +197,6 @@ BEGIN_PROVIDER [double precision, rescale_een_n_deriv_e, (4, nelec, nnuc, 0:ncor
           do ii = 1, 4
              rescale_een_n_deriv_e(ii, i, a, l) = &
                   kappa_l * elnuc_dist_deriv_e(ii, i, a)
-             !print *, "pp", ii, i, a, elnuc_dist_deriv_e(ii, i, a)
           enddo
 
           ! \left(r''(x)+r'(x)^2\right)

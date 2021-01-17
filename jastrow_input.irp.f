@@ -20,7 +20,6 @@ BEGIN_PROVIDER [ double precision, elec_coord, (nelec, 3) ]
  ! Electron coordinates
  END_DOC
  call jast_elec_champ(nelec, elec_coord)
-
 END_PROVIDER
 
 BEGIN_PROVIDER [ integer, nnuc ]
@@ -47,7 +46,6 @@ BEGIN_PROVIDER [ double precision, nuc_coord, (nnuc, 3) ]
  ! Nuclei coordinates
  END_DOC
  call jast_nuc_champ(nnuc, nuc_coord)
-
 END_PROVIDER
 
 BEGIN_PROVIDER [integer, naord]
@@ -74,14 +72,14 @@ BEGIN_PROVIDER [integer, ncord]
  ncord = 5
 END_PROVIDER
  
-BEGIN_PROVIDER [integer, dim_cord_vect]
+BEGIN_PROVIDER [integer, ndim_cord_vect]
  implicit none
  BEGIN_DOC
  ! Recomputes the length of the unique C coefficients
  END_DOC
  integer :: k, p, l, lmax
 
- dim_cord_vect = 0
+ ndim_cord_vect = 0
 
  do p = 2, ncord
     do k = 0, p - 1
@@ -91,7 +89,7 @@ BEGIN_PROVIDER [integer, dim_cord_vect]
           lmax = p - k - 2
        end if
        do l = iand(p - k, 1), lmax, 2
-          dim_cord_vect = dim_cord_vect + 1
+          ndim_cord_vect += 1
        end do
     end do
  end do
@@ -100,13 +98,12 @@ END_PROVIDER
  
 BEGIN_PROVIDER [double precision, aord_vect, (naord + 1, typenuc)]
 &BEGIN_PROVIDER [double precision, bord_vect, (nbord + 1)]
-&BEGIN_PROVIDER [double precision, cord_vect, (dim_cord_vect, typenuc)]
+&BEGIN_PROVIDER [double precision, cord_vect, (ndim_cord_vect, typenuc)]
  implicit none
  BEGIN_DOC
  ! Read Jastow coefficients from file
  END_DOC
- call jast_pars_champ(naord, typenuc, aord_vect, nbord, bord_vect, dim_cord_vect, cord_vect)
-
+ call jast_pars_champ(naord, typenuc, aord_vect, nbord, bord_vect, ndim_cord_vect, cord_vect)
 END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, cord_vect_lkp, (0:ncord-1, 0:ncord-1, 2:ncord, typenuc) ]
