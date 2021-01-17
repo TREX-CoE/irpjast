@@ -107,24 +107,18 @@ BEGIN_PROVIDER [double precision, rescale_een_e, (nelec, nelec, 0:ncord)]
  BEGIN_DOC
  ! R = exp(-kappa r) for electron-electron for $J_{een}$
  END_DOC
- integer :: i, j, l
+ integer :: i, j, k, l
  double precision :: x
  double precision, parameter :: f = dexp(1.d0)
 
  rescale_een_e(:, :, 0) = 1.d0
 
- do j = 1, nelec
-    do i = 1, j-1
-       x = dexp(-kappa * elec_dist(i, j))
-       rescale_een_e(i, j, 1) = x
-       rescale_een_e(j, i, 1) = x
-    enddo
- enddo
-
- do l = 2, ncord
+ do l = 1, ncord
+    k=0
     do j = 1, nelec
        do i = 1, j-1
-          x = rescale_een_e(i, j, l-1) * rescale_een_e(i, j, 1)
+          k = k+1
+          x = rescale_een_e_ij(k,l)
           rescale_een_e(i, j, l) = x
           rescale_een_e(j, i, l) = x
        enddo
@@ -136,6 +130,33 @@ BEGIN_PROVIDER [double precision, rescale_een_e, (nelec, nelec, 0:ncord)]
        rescale_een_e(j, j, l) = 0.d0
     enddo
  enddo
+END_PROVIDER
+
+BEGIN_PROVIDER [double precision, rescale_een_e_ij, (nelec*(nelec-1)/2, 0:ncord)]
+ implicit none
+ BEGIN_DOC
+ ! R = exp(-kappa r) for electron-electron for $J_{een}$
+ END_DOC
+ integer :: i, j, l,k
+ double precision :: x
+ double precision, parameter :: f = dexp(1.d0)
+
+ rescale_een_e_ij(:, 0) = 1.d0
+
+ k=0
+ do j = 1, nelec
+    do i = 1, j-1
+       k = k+1
+       rescale_een_e_ij(k, 1) = dexp(-kappa * elec_dist(i, j))
+    enddo
+ enddo
+
+ do l = 2, ncord
+    do k=1,(nelec*nelec-nelec)/2
+      rescale_een_e_ij(k, l) = rescale_een_e_ij(k, l-1) * rescale_een_e_ij(k, 1)
+    enddo
+ enddo
+
 END_PROVIDER
 
 BEGIN_PROVIDER [double precision, rescale_een_n, (nelec, nnuc, 0:ncord)]

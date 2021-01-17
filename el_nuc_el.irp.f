@@ -1,11 +1,11 @@
 BEGIN_PROVIDER [ double precision, factor_een ]
- implicit none
- BEGIN_DOC
- ! ElectronE-electron-nuclei contribution to Jastrow factor
- END_DOC
- integer :: i, j, a, p, k, l, lmax, m
- double precision :: rjam_cn
- double precision :: cn
+  implicit none
+  BEGIN_DOC
+  ! ElectronE-electron-nuclei contribution to Jastrow factor
+  END_DOC
+  integer                        :: i, j, a, p, k, l, lmax, m, n
+  double precision               :: cn, accu2, accu
+  double precision               :: f(nnuc,0:ncord-2,0:ncord-2)
 
  factor_een = 0.0d0
 
@@ -21,18 +21,17 @@ BEGIN_PROVIDER [ double precision, factor_een ]
           m = (p - k - l) / 2
           do a = 1, nnuc
              cn = cord_vect_lkp(l, k, p, typenuc_arr(a))
-             rjam_cn = rescale_een_n(2, a, m) * cn
-             factor_een = factor_een + rescale_een_e(1,2,k) * &
-              (rescale_een_n(1,a,l) + rescale_een_n(2,a,l)) * &
-               rescale_een_n(1,a,m) * rjam_cn
-             do j = 3, nelec
-                rjam_cn = rescale_een_n(j, a, m) * cn
+             accu2 = 0.d0
+             do j = 2, nelec
+                accu = 0.d0
                 do i = 1, j - 1
-                   factor_een = factor_een + rescale_een_e(i,j,k) * &
+                   accu = accu + rescale_een_e(i,j,k) * &
                     (rescale_een_n(i,a,l) + rescale_een_n(j,a,l)) * &
-                     rescale_een_n(i,a,m) * rjam_cn
+                     rescale_een_n(i,a,m)
                 enddo
+                accu2 = accu2 + accu * rescale_een_n(j, a, m) 
              enddo
+             factor_een = factor_een + accu2 * cn
           enddo
        enddo
     enddo
