@@ -27,10 +27,11 @@
  $$
  C_{i,al}^{k} = \sum_j r_{ij}^k\, R_{i,al}
  $$
-
- and express the total Jastrow as:
+ which can be computed efficiently with BLAS.
+ We can express the total Jastrow as:
 
  $$
  \sum_{i=1}^{Ne} \sum_{pkl} \sum_a^{Nn}
  c_{apkl} R_{ia}^{p-k-l}\, C_{i,a(p-k+l)}^k
  $$
+
