@@ -10,42 +10,41 @@ BEGIN_PROVIDER [ double precision, factor_een ]
   double precision               :: f(nnuc,0:ncord-2,0:ncord-2)
   double precision               :: tmp_c(nelec,nnuc,0:ncord,0:ncord-1)
 
-  factor_een = factor_een_blas
-  return
-
+!  factor_een = factor_een_blas
+!  return
 
  factor_een = 0.0d0
 
  do p = 2, ncord
-    do k = 0, p - 1
-       if (k /= 0) then
-          lmax = p - k
-       else
-          lmax = p - k - 2
-       endif
-       do l = 0, lmax
-          if ( iand(p - k - l, 1) == 1) cycle
+   do k = 0, p - 1
+     if (k /= 0) then
+       lmax = p - k
+     else
+       lmax = p - k - 2
+     endif
+     do l = 0, lmax
+       if ( iand(p - k - l, 1) == 1) cycle
 
-          m = (p - k - l) / 2
+       m = (p - k - l) / 2
 
-          do a = 1, nnuc
-             accu2 = 0.d0
-             cn = cord_vect_lkp(l, k, p, typenuc_arr(a))
-             do j = 2, nelec
-                accu = 0.d0
-                do i = 1, j-1
-                   accu = accu + rescale_een_e(i,j,k) * &
-                    rescale_een_n(i,a,m) * rescale_een_n(j,a,m+l) + &
-                    rescale_een_e(i,j,k) * &
-                    rescale_een_n(i,a,m+l) * rescale_een_n(j,a,m)
-                enddo
-                accu2 = accu2 + accu
-             enddo
-             factor_een = factor_een + accu2 * cn
-          enddo
-
+       do a = 1, nnuc
+         accu2 = 0.d0
+         cn = cord_vect_lkp(l, k, p, typenuc_arr(a))
+         do j = 1, nelec
+           accu = 0.d0
+           do i = 1, nelec
+             accu = accu +                                           &
+                 rescale_een_e(i,j,k) *                              &
+                 rescale_een_n(i,a,m) *                              &
+                 rescale_een_n(j,a,m+l)
+           enddo
+           accu2 = accu2 + accu
+         enddo
+         factor_een = factor_een + accu2 * cn
        enddo
-    enddo
+
+     enddo
+   enddo
  enddo
 
 END_PROVIDER
