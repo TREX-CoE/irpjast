@@ -4,34 +4,35 @@
 
   Original equation:
   
- $$
- \sum_{i=2}^{Ne} \sum_{j=1}^i \sum_{pkl} \sum_a^{Nn} c_{apkl}\, r_{ij}^k\, ( R_{ia}^l + R_{ja}^l) ( R_{ia} R_{ja})^m 
- $$
+  $$
+  \sum_{i=2}^{Ne} \sum_{j=1}^i \sum_{pkl} \sum_a^{Nn} c_{apkl}\, r_{ij}^k\, ( R_{ia}^l + R_{ja}^l) ( R_{ia} R_{ja})^m 
+  $$
 
- Expanding, one obtains:
+  Expanding, one obtains:
  
- $$
- \sum_{i=2}^{Ne} \sum_{j=1}^i \sum_{pkl} \sum_a^{Nn} c_{apkl} R_{ia}^{p-k-l}\, r_{ij}^k\, R_{ja}^{p-k+l} + c_{apkl} R_{ia}^{p-k+l}\, r_{ij}^k\, R_{ja}^{p-k-l}
- $$
+  $$
+  \sum_{i=2}^{Ne} \sum_{j=1}^i \sum_{pkl} \sum_a^{Nn} c_{apkl} R_{ia}^{p-k-l}\, r_{ij}^k\, R_{ja}^{p-k+l} + c_{apkl} R_{ia}^{p-k+l}\, r_{ij}^k\, R_{ja}^{p-k-l}
+  $$
 
- The equation is symmetric if we exchange $i$ and $j$, so we can rewrite
+  The equation is symmetric if we exchange $i$ and $j$, so we can rewrite
 
- $$
- \sum_{i=1}^{Ne} \sum_{j=1}^{Ne} \sum_{pkl} \sum_a^{Nn} c_{apkl} R_{ia}^{p-k-l}\, r_{ij}^k\, R_{ja}^{p-k+l} 
- $$
+  $$
+  \sum_{i=1}^{Ne} \sum_{j=1}^{Ne} \sum_{pkl} \sum_a^{Nn} c_{apkl} R_{ia}^{p-k-l}\, r_{ij}^k\, R_{ja}^{p-k+l} 
+  $$
  
- If we reshape $R_{ja}^p$ as a matrix $R_{j,al}$ of size 
- $N_e \times N_n(N_c+1)$, 
- for every $k$, we can pre-compute the matrix product
+  If we reshape $R_{ja}^p$ as a matrix $R_{j,al}$ of size 
+  $N_e \times N_n(N_c+1)$, 
+  for every $k$, we can pre-compute the matrix product
 
- $$
- C_{i,al}^{k} = \sum_j r_{ij}^k\, R_{i,al}
- $$
- which can be computed efficiently with BLAS.
- We can express the total Jastrow as:
+  $$
+  C_{i,al}^{k} = \sum_j r_{ij}^k\, R_{i,al}
+  $$
+  which can be computed efficiently with BLAS.
+  We can express the total Jastrow as:
 
- $$
- \sum_{i=1}^{Ne} \sum_{pkl} \sum_a^{Nn}
- c_{apkl} R_{ia}^{p-k-l}\, C_{i,a(p-k+l)}^k
- $$
+  $$
+  \sum_{i=1}^{Ne} \sum_{pkl} \sum_a^{Nn}
+  c_{apkl} R_{ia}^{p-k-l}\, C_{i,a(p-k+l)}^k
+  $$
 
+  
