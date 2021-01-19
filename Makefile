@@ -1,5 +1,5 @@
 IRPF90 = irpf90 --codelet=factor_een:100000 #-a -d
-FC     = ifort -xHost -g
+FC     = ifort -xHost -g -mkl=sequential
 FCFLAGS= -O2 -ffree-line-length-none -I .
 NINJA  = ninja
 AR = ar 
