@@ -8,8 +8,8 @@ BEGIN_PROVIDER [ double precision, factor_een ]
   integer                        :: i, j, a, p, k, l, lmax, m, n
   double precision               :: cn, accu2, accu
 
-!  factor_een = factor_een_blas
-!  return
+  factor_een = factor_een_blas
+  return
 
  factor_een = 0.0d0
 
@@ -51,6 +51,9 @@ BEGIN_PROVIDER [ double precision, factor_een_deriv_e, (4, nelec) ]
   integer                        :: i, j, a, p, k, l, lmax, m, n
   double precision               :: cn, accu, accu2, daccu(1:4), daccu2(1:4)
 
+  factor_een_deriv_e(1:4,1:nelec) = factor_een_deriv_e_blas(1:4,1:nelec)
+  return
+
  factor_een_deriv_e(1:4,1:nelec) = 0.0d0
 
  do p = 2, ncord
@@ -76,14 +79,14 @@ BEGIN_PROVIDER [ double precision, factor_een_deriv_e, (4, nelec) ]
              accu = accu +                                           &
                  rescale_een_e(i,j,k) *                              &
                  rescale_een_n(i,a,m)
-             accu2 = accu2 +                             &
+             accu2 = accu2 +                                         &
                  rescale_een_e(i,j,k) *                              &
                  rescale_een_n(i,a,m+l)
              daccu(1:4) = daccu(1:4) +                               &
-                 rescale_een_e_deriv_e(1:4,j,i,k) *                  &
+                 rescale_een_e_deriv_e_t(1:4,i,j,k) *                &
                  rescale_een_n(i,a,m)
              daccu2(1:4) = daccu2(1:4) +                             &
-                 rescale_een_e_deriv_e(1:4,j,i,k) *                  &
+                 rescale_een_e_deriv_e_t(1:4,i,j,k) *                &
                  rescale_een_n(i,a,m+l)
 
            enddo

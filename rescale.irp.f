@@ -279,6 +279,21 @@ BEGIN_PROVIDER [double precision, rescale_een_e_deriv_e, (4, nelec, nelec, 0:nco
  enddo
 END_PROVIDER
 
+BEGIN_PROVIDER [double precision, rescale_een_e_deriv_e_t, (4, nelec, nelec, 0:ncord)]
+  implicit none
+  BEGIN_DOC
+! Transposed rescale_een_e_deriv_e
+  END_DOC
+  integer :: i,j,k,l
+  do l=0,ncord
+    do j=1,nelec
+      do i=1,nelec
+        rescale_een_e_deriv_e_t(1:4,j,i,l) = rescale_een_e_deriv_e(1:4,i,j,l)
+      enddo
+    enddo
+  enddo
+END_PROVIDER
+
 
 BEGIN_PROVIDER [double precision, elec_dist_deriv_e, (4, nelec, nelec)]
  BEGIN_DOC
