@@ -279,6 +279,7 @@ BEGIN_PROVIDER [double precision, rescale_een_e_deriv_e, (4, nelec, nelec, 0:nco
  enddo
 END_PROVIDER
 
+
 BEGIN_PROVIDER [double precision, elec_dist_deriv_e, (4, nelec, nelec)]
  BEGIN_DOC
  ! Derivative of R_{ij} wrt x
