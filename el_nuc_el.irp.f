@@ -8,8 +8,8 @@ BEGIN_PROVIDER [ double precision, factor_een ]
   integer                        :: i, j, a, p, k, l, lmax, m, n
   double precision               :: cn, accu2, accu
 
-  factor_een = factor_een_blas
-  return
+!  factor_een = factor_een_blas
+!  return
 
  factor_een = 0.0d0
 
