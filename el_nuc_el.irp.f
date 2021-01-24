@@ -1,111 +1,121 @@
 BEGIN_PROVIDER [ double precision, factor_een ]
-  implicit none
-  BEGIN_DOC
-  ! ElectronE-electron-nuclei contribution to Jastrow factor
-  !
-  ! 5436.20340250000
-  END_DOC
-  integer                        :: i, j, a, p, k, l, lmax, m, n
-  double precision               :: cn, accu2, accu
+   implicit none
+   BEGIN_DOC
+   ! Electron -electron-nuclei contribution to Jastrow factor
+   !
+   ! 5436.20340250000
+   END_DOC
+   integer                        :: i, j, a, p, k, l, lmax, m, n
+   double precision               :: cn, accu2, accu
 
-!  factor_een = factor_een_blas
-!  return
+!   double precision :: ria_tmp(nelec,dim_cord_vect,nnuc)
+!   double precision :: rja_tmp(nelec,dim_cord_vect,nnuc)
+!
+!   do a = 1, nnuc
+!     do n = 1, dim_cord_vect
+!    
+!       l = lkpm_of_cindex(1,n)
+!       k = lkpm_of_cindex(2,n)
+!       p = lkpm_of_cindex(3,n)
+!       m = lkpm_of_cindex(4,n)
+!
+!       do i = 1, nelec
+!         ria_tmp(i,n,a) = rescale_een_n(i,a,m)
+!         rja_tmp(i,n,a) = rescale_een_n(i,a,m+l)
+!       enddo
+!     enddo
+!
+!   enddo
 
- factor_een = 0.0d0
 
- do p = 2, ncord
-   do k = 0, p - 1
-     if (k /= 0) then
-       lmax = p - k
-     else
-       lmax = p - k - 2
-     endif
-     do l = 0, lmax
-       if ( iand(p - k - l, 1) == 1) cycle
+   !  factor_een = factor_een_blas
+   !  return
 
-       m = (p - k - l) / 2
+   factor_een = 0.0d0
 
-       do a = 1, nnuc
-         accu2 = 0.d0
-         cn = cord_vect_lkp(l, k, p, typenuc_arr(a))
-         do j = 1, nelec
-           accu = 0.d0
-           do i = 1, nelec
-             accu = accu +                                           &
-                 rescale_een_e(i,j,k) *                              &
-                 rescale_een_n(i,a,m)
-           enddo
-           accu2 = accu2 + accu*rescale_een_n(j,a,m+l)
+   do n = 1, dim_cord_vect
+
+     l = lkpm_of_cindex(1,n)
+     k = lkpm_of_cindex(2,n)
+     p = lkpm_of_cindex(3,n)
+     m = lkpm_of_cindex(4,n)
+
+     do a = 1, nnuc
+       accu2 = 0.d0
+       cn = cord_vect_full(n, a)
+       do j = 1, nelec
+         accu = 0.d0
+         do i = 1, nelec
+           accu = accu +                                             &
+               rescale_een_e(i,j,k) *                                &
+               rescale_een_n(i,a,m)
          enddo
-         factor_een = factor_een + accu2 * cn
+         accu2 = accu2 + accu*rescale_een_n(j,a,m+l)
        enddo
-
+       factor_een = factor_een + accu2 * cn
      enddo
+
    enddo
- enddo
 
 END_PROVIDER
 
 BEGIN_PROVIDER [ double precision, factor_een_deriv_e, (4, nelec) ]
   implicit none
+  BEGIN_DOC
+! Derivative of the Jeen
+! 35533.115255
+  END_DOC
   integer                        :: i, j, a, p, k, l, lmax, m, n
   double precision               :: cn, accu, accu2, daccu(1:4), daccu2(1:4)
-
-  factor_een_deriv_e(1:4,1:nelec) = factor_een_deriv_e_blas(1:4,1:nelec)
-  return
-
- factor_een_deriv_e(1:4,1:nelec) = 0.0d0
-
- do p = 2, ncord
-   do k = 0, p - 1
-     if (k /= 0) then
-       lmax = p - k
-     else
-       lmax = p - k - 2
-     endif
-     do l = 0, lmax
-       if ( iand(p - k - l, 1) == 1) cycle
-
-       m = (p - k - l) / 2
-
-       do a = 1, nnuc
-         cn = cord_vect_lkp(l, k, p, typenuc_arr(a))
-         do j = 1, nelec
-           accu=0.d0
-           accu2 = 0.d0
-           daccu (1:4) = 0.d0
-           daccu2(1:4) = 0.d0
-           do i = 1, nelec
-             accu = accu +                                           &
-                 rescale_een_e(i,j,k) *                              &
-                 rescale_een_n(i,a,m)
-             accu2 = accu2 +                                         &
-                 rescale_een_e(i,j,k) *                              &
-                 rescale_een_n(i,a,m+l)
-             daccu(1:4) = daccu(1:4) +                               &
-                 rescale_een_e_deriv_e_t(1:4,i,j,k) *                &
-                 rescale_een_n(i,a,m)
-             daccu2(1:4) = daccu2(1:4) +                             &
-                 rescale_een_e_deriv_e_t(1:4,i,j,k) *                &
-                 rescale_een_n(i,a,m+l)
-
-           enddo
-           factor_een_deriv_e(1:4,j) = factor_een_deriv_e(1:4,j) +   &
-               (accu * rescale_een_n_deriv_e(1:4,j,a,m+l) + daccu(1:4) * rescale_een_n(j,a,m+l) + &
-                daccu2(1:4)* rescale_een_n(j,a,m) + accu2*rescale_een_n_deriv_e(1:4,j,a,m)) * cn
-
-           factor_een_deriv_e(4,j) = factor_een_deriv_e(4,j) + 2.d0*( &
-             daccu (1) * rescale_een_n_deriv_e(1,j,a,m+l) + &
-             daccu (2) * rescale_een_n_deriv_e(2,j,a,m+l) + &
-             daccu (3) * rescale_een_n_deriv_e(3,j,a,m+l) + &
-             daccu2(1) * rescale_een_n_deriv_e(1,j,a,m  ) + &
-             daccu2(2) * rescale_een_n_deriv_e(2,j,a,m  ) + &
-             daccu2(3) * rescale_een_n_deriv_e(3,j,a,m  ) )*cn
-         enddo
-       enddo
-     enddo
-   enddo
- enddo
+  
+!  factor_een_deriv_e(1:4,1:nelec) = factor_een_deriv_e_blas(1:4,1:nelec)
+!  return
+  
+  factor_een_deriv_e(1:4,1:nelec) = 0.0d0
+  
+  do n = 1, dim_cord_vect
+    
+    l = lkpm_of_cindex(1,n)
+    k = lkpm_of_cindex(2,n)
+    p = lkpm_of_cindex(3,n)
+    m = lkpm_of_cindex(4,n)
+    
+    do a = 1, nnuc
+      cn = cord_vect_full(n, a)
+      do j = 1, nelec
+        accu=0.d0
+        accu2 = 0.d0
+        daccu (1:4) = 0.d0
+        daccu2(1:4) = 0.d0
+        do i = 1, nelec
+          accu = accu +                                              &
+              rescale_een_e(i,j,k) *                                 &
+              rescale_een_n(i,a,m)
+          accu2 = accu2 +                                            &
+              rescale_een_e(i,j,k) *                                 &
+              rescale_een_n(i,a,m+l)
+          daccu(1:4) = daccu(1:4) +                                  &
+              rescale_een_e_deriv_e_t(1:4,i,j,k) *                   &
+              rescale_een_n(i,a,m)
+          daccu2(1:4) = daccu2(1:4) +                                &
+              rescale_een_e_deriv_e_t(1:4,i,j,k) *                   &
+              rescale_een_n(i,a,m+l)
+          
+        enddo
+        factor_een_deriv_e(1:4,j) = factor_een_deriv_e(1:4,j) +      &
+            (accu * rescale_een_n_deriv_e(1:4,j,a,m+l) + daccu(1:4) * rescale_een_n(j,a,m+l) +&
+            daccu2(1:4)* rescale_een_n(j,a,m) + accu2*rescale_een_n_deriv_e(1:4,j,a,m)) * cn
+        
+        factor_een_deriv_e(4,j) = factor_een_deriv_e(4,j) + 2.d0*(   &
+            daccu (1) * rescale_een_n_deriv_e(1,j,a,m+l) +           &
+            daccu (2) * rescale_een_n_deriv_e(2,j,a,m+l) +           &
+            daccu (3) * rescale_een_n_deriv_e(3,j,a,m+l) +           &
+            daccu2(1) * rescale_een_n_deriv_e(1,j,a,m  ) +           &
+            daccu2(2) * rescale_een_n_deriv_e(2,j,a,m  ) +           &
+            daccu2(3) * rescale_een_n_deriv_e(3,j,a,m  ) )*cn
+      enddo
+    enddo
+  enddo
 
 END_PROVIDER
 

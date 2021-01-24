@@ -32,51 +32,43 @@
  enddo
 
 
- do p = 2, ncord
-   do k = 0, p - 1
-      m = p-k
-      if (k > 0) then
-        lmax = m
-      else
-        lmax = m - 2
-      endif
+ do n = 1, dim_cord_vect
 
-     n = shiftr(m,1)
-     do l = iand(m, 1), lmax, 2
+   l = lkpm_of_cindex(1,n)
+   k = lkpm_of_cindex(2,n)
+   p = lkpm_of_cindex(3,n)
+   m = lkpm_of_cindex(4,n)
 
-       do a = 1, nnuc
-         cn(a) = cord_vect_lkp(l, k, p, typenuc_arr(a))
-       enddo
+   do a = 1, nnuc
+     cn(a) = cord_vect_full(n, a)
+   enddo
 
-       do a = 1, nnuc
-         accu = 0.d0
+   do a = 1, nnuc
+     accu = 0.d0
 
-         do j=1,nelec
-           accu = accu + rescale_een_n(j,a,n) * tmp_c(j,a,n+l,k)
+     do j=1,nelec
+       accu = accu + rescale_een_n(j,a,m) * tmp_c(j,a,m+l,k)
 
-           factor_een_deriv_e_blas(1:4,j) = factor_een_deriv_e_blas(1:4,j) + (&
-               tmp_c(j,a,n,k) * rescale_een_n_deriv_e(1:4,j,a,n+l) + &
-               dtmp_c(1:4,j,a,n,k) * rescale_een_n(j,a,n+l) +        &
-               dtmp_c(1:4,j,a,n+l,k) * rescale_een_n(j,a,n) +        &
-               tmp_c(j,a,n+l,k)*rescale_een_n_deriv_e(1:4,j,a,n)     &
-               ) * cn(a)
+       factor_een_deriv_e_blas(1:4,j) = factor_een_deriv_e_blas(1:4,j) + (&
+           tmp_c(j,a,m,k) * rescale_een_n_deriv_e(1:4,j,a,m+l) +     &
+           dtmp_c(1:4,j,a,m,k) * rescale_een_n(j,a,m+l) +            &
+           dtmp_c(1:4,j,a,m+l,k) * rescale_een_n(j,a,m) +            &
+           tmp_c(j,a,m+l,k)*rescale_een_n_deriv_e(1:4,j,a,m)         &
+           ) * cn(a)
 
-           factor_een_deriv_e_blas(4,j) = factor_een_deriv_e_blas(4,j) + (&
-               dtmp_c(1,j,a,n  ,k) * rescale_een_n_deriv_e(1,j,a,n+l) +&
-               dtmp_c(2,j,a,n  ,k) * rescale_een_n_deriv_e(2,j,a,n+l) +&
-               dtmp_c(3,j,a,n  ,k) * rescale_een_n_deriv_e(3,j,a,n+l) +&
-               dtmp_c(1,j,a,n+l,k) * rescale_een_n_deriv_e(1,j,a,n  ) +&
-               dtmp_c(2,j,a,n+l,k) * rescale_een_n_deriv_e(2,j,a,n  ) +&
-               dtmp_c(3,j,a,n+l,k) * rescale_een_n_deriv_e(3,j,a,n  )&
-               )*cn(a)*2.d0
-
-         enddo
-         factor_een_blas = factor_een_blas + accu * cn(a)
-
-       enddo
-       n = n-1
+       factor_een_deriv_e_blas(4,j) = factor_een_deriv_e_blas(4,j) + (&
+           dtmp_c(1,j,a,m  ,k) * rescale_een_n_deriv_e(1,j,a,m+l) +  &
+           dtmp_c(2,j,a,m  ,k) * rescale_een_n_deriv_e(2,j,a,m+l) +  &
+           dtmp_c(3,j,a,m  ,k) * rescale_een_n_deriv_e(3,j,a,m+l) +  &
+           dtmp_c(1,j,a,m+l,k) * rescale_een_n_deriv_e(1,j,a,m  ) +  &
+           dtmp_c(2,j,a,m+l,k) * rescale_een_n_deriv_e(2,j,a,m  ) +  &
+           dtmp_c(3,j,a,m+l,k) * rescale_een_n_deriv_e(3,j,a,m  )    &
+           )*cn(a)*2.d0
 
      enddo
+     factor_een_blas = factor_een_blas + accu * cn(a)
+
    enddo
  enddo
+
 END_PROVIDER
