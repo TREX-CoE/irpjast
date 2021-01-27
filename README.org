@@ -35,4 +35,22 @@
   c_{apkl} R_{ia}^{p-k-l}\, C_{i,a(p-k+l)}^k
   $$
 
-  
+** Rank reduction
+
+*** Idea
+
+The idea is to use SVD and fast-updates to reduce the rank of the
+intermediate \(r^k_{ij} = \Gamma_{i,j,k}\) like so.
+
+\[
+\Gamma_{i,j,k} = U_{i,d,k} \cdot D_{d,d,k} \cdot V^T_{d,j,k}
+\]
+
+Where \( D_{d,d,k}\) is a diagonal in indices \(i,j\) and is of rank \(d \ll Min(i,j)\).
+
+** Auto-generate derivatives
+
+*** Idea
+
+The calculation of first and second derivatives of
+a network of tensors contracted using BLAS can also be expressed as a sum of BLAS contractions. However, there are many pitfalls. Here we shall consider an automated generation of contraction scheme to optimize the order in which the BLAS contraction is performed.
