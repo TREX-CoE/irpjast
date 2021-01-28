@@ -48,6 +48,12 @@ intermediate \(r^k_{ij} = \Gamma_{i,j,k}\) like so.
 
 Where \( D_{d,d,k}\) is a diagonal in indices \(i,j\) and is of rank \(d \ll Min(i,j)\).
 
+Algorithms for fast rank-1 updates of a r-thin SVD has been published in the following papers:
+
+1. https://doi.org/10.1016/j.laa.2005.07.021
+
+2. https://doi.org/10.1002/pamm.200810827
+
 ** Auto-generate derivatives
 
 *** Idea
