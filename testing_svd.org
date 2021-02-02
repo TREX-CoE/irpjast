@@ -1,0 +1,407 @@
+#+TITLE: Testing Svd
+#+title:     Testing SVD
+#+author:    Vijay Gopal Chilkuri
+#+email:     vijay.gopal.c@gmail.com
+
+* Generate a block random distribution of positions
+
+Here's a small function to generate random points inside a 3D box of given length.
+
+#+name: generate3Dpoints
+#+begin_src python
+
+
+def get_sphere_distribution(n, dmin, Ls, maxiter=1e4, allow_wall=True):
+    """Get random points in a box with given dimensions and minimum separation.
+
+    Parameters:
+
+    - n: number of points
+    - dmin: minimum distance
+    - Ls: dimensions of box, shape (3,) array
+    - maxiter: maximum number of iterations.
+    - allow_wall: whether to allow points on wall;
+       (if False: points need to keep distance dmin/2 from the walls.)
+
+    Return:
+
+    - ps: array (n, 3) of point positions,
+      with 0 <= ps[:, i] < Ls[i]
+    - n_iter: number of iterations
+    - dratio: average nearest-neighbor distance, divided by dmin.
+
+    Note: with a fill density (sphere volume divided by box volume) above about
+    0.53, it takes very long. (Random close-packed spheres have a fill density
+    of 0.64).
+
+    Author: Han-Kwang Nienhuys (2020)
+    Copying: BSD, GPL, LGPL, CC-BY, CC-BY-SA
+    See Stackoverflow: https://stackoverflow.com/a/62895898/6228891
+    """
+    Ls = np.array(Ls).reshape(3)
+    if not allow_wall:
+        Ls -= dmin
+
+    # filling factor; 0.64 is for random close-packed spheres
+    # This is an estimate because close packing is complicated near the walls.
+    # It doesn't work well for small L/dmin ratios.
+    sphere_vol = np.pi/6*dmin**3
+    box_vol = np.prod(Ls + 0.5*dmin)
+    fill_dens = n*sphere_vol/box_vol
+    if fill_dens > 0.64:
+        msg = f'Too many to fit in the volume, density {fill_dens:.3g}>0.64'
+        raise ValueError(msg)
+
+    # initial try
+    ps = np.random.uniform(size=(n, 3)) * Ls
+
+    # distance-squared matrix (diagonal is self-distance, don't count)
+    dsq = ((ps - ps.reshape(n, 1, 3))**2).sum(axis=2)
+    dsq[np.arange(n), np.arange(n)] = np.infty
+
+    for iter_no in range(int(maxiter)):
+        # find points that have too close neighbors
+        close_counts = np.sum(dsq < dmin**2, axis=1)  # shape (n,)
+        n_close = np.count_nonzero(close_counts)
+        if n_close == 0:
+            break
+
+        # Move the one with the largest number of too-close neighbors
+        imv = np.argmax(close_counts)
+
+        # new positions
+        newp = np.random.uniform(size=3)*Ls
+        ps[imv]= newp
+
+        # update distance matrix
+        new_dsq_row = ((ps - newp.reshape(1, 3))**2).sum(axis=-1)
+        dsq[imv, :] = dsq[:, imv] = new_dsq_row
+        dsq[imv, imv] = np.inf
+    else:
+        raise RuntimeError(f'Failed after {iter_no+1} iterations.')
+
+    if not allow_wall:
+        ps += dmin/2
+
+    dratio = (np.sqrt(dsq.min(axis=1))/dmin).mean()
+    return ps, iter_no+1, dratio
+#+end_src
+
+A function that generates a block random set of points
+
+#+name: generateBlocks
+#+begin_src python :noweb yes
+
+<<generate3Dpoints>>
+
+def generateBlockRandomPointsAtShftApart(n,L1,dmin,shift):
+    """
+    Parameters:
+
+    - n: number of points
+    - L1: dimensions of box, shape (3,) array
+    - dmin: minimum intra block distance
+    - shift: inter block distance
+
+    Return:
+
+    - r: array (n, 3) of point positions,
+
+    """
+
+    Ls = np.array([L1,L1,L1]) # lengths of the box
+
+    # Quadrant +,+
+    dist11,a,b = get_sphere_distribution(n,dmin,Ls)
+    dist11 += np.array([shift,shift,0.0])
+
+    # Quadrant -,+
+    dist21,a,b = get_sphere_distribution(n,dmin,Ls)
+    dist21 += np.array([-shift,shift,0.0])
+
+    # Quadrant +,-
+    dist12,a,b = get_sphere_distribution(n,dmin,Ls)
+    dist12 += np.array([shift,-shift,0.0])
+
+    # Quadrant -,-
+    dist22,a,b = get_sphere_distribution(n,dmin,Ls)
+    dist22 += np.array([-shift,-shift,0.0])
+
+    xs = np.concatenate((dist11[:,0],dist12[:,0],dist21[:,0],dist22[:,0]))
+    ys = np.concatenate((dist11[:,1],dist12[:,1],dist21[:,1],dist22[:,1]))
+    zs = np.concatenate((dist11[:,2],dist12[:,2],dist21[:,2],dist22[:,2]))
+
+    return((np.array((xs,ys,zs))).T)
+#+end_src
+
+#+RESULTS: generateBlocks
+#+begin_example
+None
+#+end_example
+
+#+begin_src python :noweb yes :results file :exports results
+
+# matplotlib related
+import matplotlib.pyplot as plt
+# linear algebra
+import numpy as np
+
+<<generate3Dpoints>>
+
+shift = -1.0
+
+# Quadrant +,+
+L1 = 1.0
+n = 50 # number of points
+dmin = 0.1 # min dist between points
+Ls = np.array([L1,L1,L1]) # lengths of the box
+dist11,a,b = get_sphere_distribution(n,dmin,Ls)
+dist11 += np.array([shift,shift,0.0])
+
+# Quadrant -,+
+L1 = 1.0
+n = 50 # number of points
+dmin = 0.1 # min dist between points
+Ls = np.array([L1,L1,L1]) # lengths of the box
+dist21,a,b = get_sphere_distribution(n,dmin,Ls)
+dist21 += np.array([-shift,shift,0.0])
+
+# Quadrant +,-
+L1 = 1.0
+n = 50 # number of points
+dmin = 0.1 # min dist between points
+Ls = np.array([L1,L1,L1]) # lengths of the box
+dist12,a,b = get_sphere_distribution(n,dmin,Ls)
+dist12 += np.array([shift,-shift,0.0])
+
+# Quadrant -,-
+L1 = 1.0
+n = 50 # number of points
+dmin = 0.1 # min dist between points
+Ls = np.array([L1,L1,L1]) # lengths of the box
+dist22,a,b = get_sphere_distribution(n,dmin,Ls)
+dist22 += np.array([-shift,-shift,0.0])
+
+
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+
+xs = np.concatenate((dist11[:,0],dist12[:,0],dist21[:,0],dist22[:,0]))
+ys = np.concatenate((dist11[:,1],dist12[:,1],dist21[:,1],dist22[:,1]))
+zs = np.concatenate((dist11[:,2],dist12[:,2],dist21[:,2],dist22[:,2]))
+ax.scatter(xs, ys, zs, marker='o')
+
+fig.savefig('/tmp/test3.png')
+#plt.show()
+return '/tmp/test3.png'
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/test3.png]]
+
+* Is the SVD decomposition of distances really useful ?
+
+The problem is the following:
+
+** Given a metric F(r1,r2) finding the best representatin of F(r1,r2)
+
+*** Slater metric
+
+The metric can be a scaled distance such as
+
+\[
+F(r_1,r_2) = \exp(-\kappa(|r_1 - r_2|))
+\]
+
+Where,\(\kappa\) is the rate of the breadth of the slater.
+
+#+begin_src python :results file :exports results
+# matplotlib related
+import matplotlib
+import matplotlib.pyplot as plt
+# linear algebra
+import numpy
+
+# Data for plotting
+
+kappa  = 1.0/2.0
+xstart = 0.0
+xend   = 2.0
+xstep  = 0.1
+s = numpy.array(list(map(lambda x : numpy.exp(-x * numpy.arange(xstart,xend,xstep)), [100, 25, 10,5,2,1]))).T
+#s = numpy.exp(-kappa * numpy.arange(0,1,0.1))
+t = numpy.arange(xstart,xend,xstep)
+
+fig, ax = plt.subplots()
+ax.plot(t, s)
+
+ax.set(xlabel=r'$r_{12}$', ylabel=r'$F(r_1,r_2)$',
+       title='Comparison of Kappa')
+#ax.set_yscale('log')
+ax.grid()
+
+fig.savefig('/tmp/test1.png')
+#plt.show()
+return '/tmp/test1.png'
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/test1.png]]
+
+
+*** Gaussian metric
+
+The metric can be a scaled distance such as
+
+\[
+F(r_1,r_2) = \exp(-\kappa(|r_1 - r_2|^2))
+\]
+
+Where,\(\kappa\) is the rate of the breadth of the gaussian.
+
+#+begin_src python :results file :exports results
+# matplotlib related
+import matplotlib
+import matplotlib.pyplot as plt
+# linear algebra
+import numpy
+
+# Data for plotting
+
+kappa  = 1.0/2.0
+xstart = 0.0
+xend   = 2.0
+xstep  = 0.1
+s = numpy.array(list(map(lambda x : numpy.exp(-x * numpy.power(numpy.arange(xstart,xend,xstep),2)), [100, 25, 10,5,2,1]))).T
+#s = numpy.exp(-kappa * numpy.arange(0,1,0.1))
+t = numpy.arange(xstart,xend,xstep)
+
+
+fig, ax = plt.subplots()
+ax.plot(t, s)
+
+ax.set(xlabel=r'$r_{12}$', ylabel=r'$F(r_1,r_2)$',
+       title='Comparison of Kappa')
+#ax.set_yscale('log')
+ax.grid()
+
+fig.savefig('/tmp/test2.png')
+#plt.show()
+return '/tmp/test2.png'
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/test2.png]]
+
+* Generating a box of electrons centered around nucleii
+
+** Generate randomly distributed nucleii
+
+The nucleii will serve as anchors for the screening of distances for calculating the
+screened \(\tilde{F}(r_1,r_2)\) metric.
+
+
+
+* Calculating SVD of the distance vector
+
+** Slater metric
+
+Calculate the matrix of the \(F(r_1,r_2)\) metric i.e. the slater metric.
+
+#+begin_src python :noweb yes :results file :exports results
+import numpy as np
+from functools import reduce
+import matplotlib.pyplot as plt
+
+<<generateBlocks>>
+
+L1 = 1.0
+n = 10 # number of points
+dmin = 0.01 # min dist between points
+Ls = np.array([L1,L1,L1]) # lengths of the box
+shift = -1.0
+kappa = 0.6
+
+rlist = generateBlockRandomPointsAtShftApart(n,L1,dmin,shift)
+print(rlist.shape)
+
+rij = np.zeros(shape=(rlist.shape[0],rlist.shape[0]))
+
+def funcF(x,y):
+    return(np.exp(-kappa * np.sqrt(np.abs(np.dot(x,y)))))
+
+rij = np.array([[funcF(xval, yval) for yval in rlist] for xval in rlist])
+
+u,d,vt = np.linalg.svd(rij)
+#print(d)
+#plt.imshow(rij)
+#plt.colorbar()
+#plt.show()
+plt.plot(range(d.shape[0]),d)
+plt.yscale('log')
+plt.savefig('/tmp/plot3.png')
+return '/tmp/plot3.png'
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/plot3.png]]
+
+#+begin_src python :results output
+import numpy
+a = numpy.array([[1,2,3],[4,5,6],[7,8,9]])
+b = numpy.array([[11,12,13],[14,15,16],[17,18,19]])
+print(list(zip(a,b))[0][1])
+
+#+end_src
+
+#+RESULTS:
+#+begin_example
+[11 12 13]
+#+end_example
+
+** Gaussian metric
+
+Calculate the matrix of the \(FG(r_1,r_2)\) metric i.e. the gaussian metric.
+
+#+begin_src python :noweb yes :results file :exports results
+import numpy as np
+from functools import reduce
+import matplotlib.pyplot as plt
+
+<<generateBlocks>>
+
+L1 = 1.0
+n = 50 # number of points
+dmin = 0.1 # min dist between points
+Ls = np.array([L1,L1,L1]) # lengths of the box
+shift = -10.0
+kappa = 2.0
+
+rlist = generateBlockRandomPointsAtShftApart(n,L1,dmin,shift)
+print(rlist.shape)
+
+rij = np.zeros(shape=(rlist.shape[0],rlist.shape[0]))
+
+def funcF(x,y):
+    return(np.exp(-kappa * np.sqrt(np.abs(np.dot(x,y)))))
+
+def funcFG(x,y):
+    return(np.exp(-kappa * np.abs(np.dot(x,y))))
+
+rijSlater = np.array([[funcF(xval, yval) for yval in rlist] for xval in rlist])
+rijGaussian = np.array([[funcFG(xval, yval) for yval in rlist] for xval in rlist])
+
+u,dS,vt = np.linalg.svd(rijSlater)
+u,dG,vt = np.linalg.svd(rijGaussian)
+#print(d)
+#plt.imshow(rij)
+#plt.colorbar()
+#plt.show()
+plt.plot(range(dG.shape[0]),np.array([dS,dG]).T)
+plt.yscale('log')
+plt.savefig('/tmp/plot4.png')
+return '/tmp/plot4.png'
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/plot4.png]]
