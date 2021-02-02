@@ -140,6 +140,39 @@ None
 #+end_example
 
 #+begin_src python :noweb yes :results file :exports results
+import numpy as np
+# matplotlib related
+import matplotlib.pyplot as plt
+
+<<generateBlocks>>
+
+L1 = 1.0
+n = 100 # number of points
+dmin = 0.1 # min dist between points
+Ls = np.array([L1,L1,L1]) # lengths of the box
+shift = -10.0
+kappa = 2.0
+
+rlist = generateBlockRandomPointsAtShftApart(n,L1,dmin,shift)
+print(rlist.shape)
+
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+
+xs = rlist.T[0]
+ys = rlist.T[1]
+zs = rlist.T[2]
+ax.scatter(xs, ys, zs, marker='o')
+
+fig.savefig('/tmp/test8.png')
+#plt.show()
+return '/tmp/test8.png'
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/test8.png]]
+
+#+begin_src python :noweb yes :results file :exports results
 
 # matplotlib related
 import matplotlib.pyplot as plt
@@ -328,7 +361,7 @@ print(rlist.shape)
 rij = np.zeros(shape=(rlist.shape[0],rlist.shape[0]))
 
 def funcF(x,y):
-    return(np.exp(-kappa * np.sqrt(np.abs(np.dot(x,y)))))
+    return(np.exp(-kappa * np.linalg.norm(x-y)))
 
 rij = np.array([[funcF(xval, yval) for yval in rlist] for xval in rlist])
 
@@ -351,12 +384,32 @@ import numpy
 a = numpy.array([[1,2,3],[4,5,6],[7,8,9]])
 b = numpy.array([[11,12,13],[14,15,16],[17,18,19]])
 print(list(zip(a,b))[0][1])
+print(numpy.square(a[:,0]))
 
+def stepExp(a):
+    def myexp(x):
+        if numpy.abs(x) > 1e+0:
+            return numpy.zeros_like(x)
+        else:
+            return numpy.exp(x)
+
+    res = numpy.array([[myexp(x) for x in y] for y in a])
+    return(res)
+
+print(numpy.exp(a))
+print(stepExp(a))
 #+end_src
 
 #+RESULTS:
 #+begin_example
 [11 12 13]
+[ 1 16 49]
+[[2.71828183e+00 7.38905610e+00 2.00855369e+01]
+ [5.45981500e+01 1.48413159e+02 4.03428793e+02]
+ [1.09663316e+03 2.98095799e+03 8.10308393e+03]]
+[[2.71828183 0.         0.        ]
+ [0.         0.         0.        ]
+ [0.         0.         0.        ]]
 #+end_example
 
 ** Gaussian metric
@@ -371,7 +424,7 @@ import matplotlib.pyplot as plt
 <<generateBlocks>>
 
 L1 = 1.0
-n = 50 # number of points
+n = 100 # number of points
 dmin = 0.1 # min dist between points
 Ls = np.array([L1,L1,L1]) # lengths of the box
 shift = -10.0
@@ -383,21 +436,31 @@ print(rlist.shape)
 rij = np.zeros(shape=(rlist.shape[0],rlist.shape[0]))
 
 def funcF(x,y):
-    return(np.exp(-kappa * np.sqrt(np.abs(np.dot(x,y)))))
+    return(np.exp(-kappa * np.linalg.norm(x-y)))
 
 def funcFG(x,y):
-    return(np.exp(-kappa * np.abs(np.dot(x,y))))
+    return(np.exp(-kappa * np.square(np.linalg.norm(x-y))))
+
+def funcFGD(x,y):
+    rij = np.exp(-kappa * 0.1 * np.square(np.linalg.norm(x-y)))
+    return(rij)
 
 rijSlater = np.array([[funcF(xval, yval) for yval in rlist] for xval in rlist])
 rijGaussian = np.array([[funcFG(xval, yval) for yval in rlist] for xval in rlist])
+rijDeltafn = np.array([[funcFGD(xval, yval) for yval in rlist] for xval in rlist])
 
 u,dS,vt = np.linalg.svd(rijSlater)
+dS = dS/np.linalg.norm(dS)
 u,dG,vt = np.linalg.svd(rijGaussian)
+dG = dG/np.linalg.norm(dG)
+u,dGD,vt = np.linalg.svd(rijDeltafn)
+dGD = dGD/np.linalg.norm(dGD)
+
 #print(d)
 #plt.imshow(rij)
 #plt.colorbar()
 #plt.show()
-plt.plot(range(dG.shape[0]),np.array([dS,dG]).T)
+plt.plot(range(dG.shape[0]),np.array([dS,dG,dGD]).T)
 plt.yscale('log')
 plt.savefig('/tmp/plot4.png')
 return '/tmp/plot4.png'
@@ -405,3 +468,159 @@ return '/tmp/plot4.png'
 
 #+RESULTS:
 [[file:/tmp/plot4.png]]
+
+** Palying around
+
+Calculate the matrix of the \(FG(r_1,r_2)\) metric i.e. the gaussian metric.
+
+#+begin_src python :noweb yes :results file :exports results
+import numpy as np
+from functools import reduce
+import matplotlib.pyplot as plt
+
+<<generateBlocks>>
+
+L1 = 1.0
+n = 100 # number of points
+dmin = 0.1 # min dist between points
+Ls = np.array([L1,L1,L1]) # lengths of the box
+shift = -1.0
+kappa = 2.0
+
+rlist = generateBlockRandomPointsAtShftApart(n,L1,dmin,shift)
+print(rlist.shape)
+
+rij = np.zeros(shape=(rlist.shape[0],rlist.shape[0]))
+
+
+def funcF(x,y):
+    rij = np.exp(-kappa * np.linalg.norm(x-y))
+    return(rij)
+
+def funcFG(x,y):
+    rij = np.exp(-kappa * np.square(np.linalg.norm(x-y)))
+    return(rij)
+
+def myexp(x):
+    if np.abs(x) > 1e-0:
+        return np.exp(-x)
+    else:
+        return np.exp(x)
+
+def funcFGD(x,y):
+    rij = myexp(-kappa * np.square(np.linalg.norm(x-y)))
+    return(rij)
+
+rijSlater = np.array([[funcF(xval, yval) for yval in rlist] for xval in rlist])
+#rijSlater = rijSlater/np.max(rijSlater)
+rijGaussian = np.array([[funcFG(xval, yval) for yval in rlist] for xval in rlist])
+#rijGaussian = rijGaussian/np.max(rijGaussian)
+rijDeltafn = np.array([[funcFGD(xval, yval) for yval in rlist] for xval in rlist])
+#rijDeltafn = rijDeltafn/np.max(rijDeltafn)
+
+u,dS,vt = np.linalg.svd(rijSlater)
+dS = dS/np.linalg.norm(dS)
+u,dG,vt = np.linalg.svd(rijGaussian)
+dG = dG/np.linalg.norm(dG)
+u,dGD,vt = np.linalg.svd(rijDeltafn)
+dGD = dGD/np.linalg.norm(dGD)
+
+#print(d)
+#plt.imshow(rij)
+#plt.colorbar()
+#plt.show()
+plt.plot(range(dG.shape[0]),np.array([dS,dG,dGD]).T)
+plt.yscale('log')
+plt.savefig('/tmp/plot5.png')
+return '/tmp/plot5.png'
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/plot5.png]]
+#+begin_src python :results file :exports results
+import numpy
+import matplotlib.pyplot as plt
+
+def myexp2(x):
+    if numpy.abs(x) > 1e-0:
+        return numpy.exp(-x)
+    else:
+        return numpy.exp(x)
+
+def myexp(x):
+    return(numpy.array([myexp2(y) for y in x]))
+
+kappa  = 1.0/2.0
+xstart = 0.0
+xend   = 2.0
+xstep  = 0.1
+s = numpy.array(list(map(lambda x : myexp(-x * numpy.power(numpy.arange(xstart,xend,xstep),2)), [10,5,1,0.5,0.1]))).T
+#s = numpy.exp(-kappa * numpy.arange(0,1,0.1))
+t = numpy.arange(xstart,xend,xstep)
+
+
+fig, ax = plt.subplots()
+ax.plot(t, s)
+
+ax.set(xlabel=r'$r_{12}$', ylabel=r'$F(r_1,r_2)$',
+       title='Comparison of Kappa')
+ax.set_yscale('log')
+ax.grid()
+
+fig.savefig('/tmp/test7.png')
+#plt.show()
+return '/tmp/test7.png'
+#+end_src
+
+#+RESULTS:
+[[file:/tmp/test7.png]]
+
+** Testing SVD for custom matrices
+
+#+begin_src python :results output
+import numpy
+import matplotlib.pyplot as plt
+
+a = numpy.array([[0,100,200],[100,0,200],[100,200,0]])
+b = numpy.exp(-a)
+print("Matrix A")
+print(a)
+print("Matrix Exp(A)")
+print(numpy.around(b,10))
+u,d,vt = numpy.linalg.svd(a)
+d = d/numpy.linalg.norm(d)
+print("Singular values of A")
+print(numpy.around(d,3))
+print("Singular vectors of A")
+print(numpy.around(u,3))
+u,d,vt = numpy.linalg.svd(b)
+d = d/numpy.linalg.norm(d)
+print("Singular values of Exp(A)")
+print(numpy.around(d,3))
+print("Singular vectors of Exp(A)")
+print(numpy.around(u,3))
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Matrix A
+[[  0 100 200]
+ [100   0 200]
+ [100 200   0]]
+Matrix Exp(A)
+[[1. 0. 0.]
+ [0. 1. 0.]
+ [0. 0. 1.]]
+Singular values of A
+[0.813 0.53  0.24 ]
+Singular vectors of A
+[[-0.67   0.142  0.728]
+ [-0.626  0.42  -0.657]
+ [-0.399 -0.896 -0.193]]
+Singular values of Exp(A)
+[0.577 0.577 0.577]
+Singular vectors of Exp(A)
+[[-1.     0.    -0.   ]
+ [-0.    -0.894 -0.447]
+ [-0.    -0.447  0.894]]
+#+end_example
