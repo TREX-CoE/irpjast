@@ -12,7 +12,7 @@ BEGIN_PROVIDER [ integer, nelec_up ]
  BEGIN_DOC
  ! Number of alpha and beta electrons
  END_DOC
- nelec_up = 5
+ nelec_up = nelec/2
 END_PROVIDER
 
 

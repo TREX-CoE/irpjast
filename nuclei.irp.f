@@ -4,7 +4,8 @@ BEGIN_PROVIDER [ integer, nnuc ]
  ! Number of nuclei
  END_DOC
  !nnuc = 2
- read(*,*)nnuc
+! read(*,*)nnuc
+ nnuc = nelec/5
 END_PROVIDER
 
 
