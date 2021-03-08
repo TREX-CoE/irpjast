@@ -47,6 +47,8 @@
  factor_een_blas = 0.0d0
  factor_een_deriv_e_blas(1:4,1:nelec) = 0.0d0
 
+ TOUCH tmp_c dtmp_c
+
  do n = 1, dim_cord_vect
 
    l = lkpm_of_cindex(1,n)
