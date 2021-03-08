@@ -28,7 +28,7 @@
  enddo
 
 
- END_PROVIDER
+END_PROVIDER
 
 
  BEGIN_PROVIDER [ double precision, factor_een_blas ]
@@ -41,13 +41,12 @@
 
  integer                        :: i, j, a, p, k, l, lmax, m, n
  double precision               :: accu
- double precision,dimension(:),allocatable       :: cn
- allocate(cn(ncord))
+ double precision               :: cn(ncord)
 
  factor_een_blas = 0.0d0
  factor_een_deriv_e_blas(1:4,1:nelec) = 0.0d0
 
- TOUCH tmp_c dtmp_c
+ PROVIDE tmp_c dtmp_c
 
  do n = 1, dim_cord_vect
 
@@ -88,5 +87,4 @@
    enddo
  enddo
 
- deallocate(cn)
 END_PROVIDER

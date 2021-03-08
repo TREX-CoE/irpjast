@@ -1,4 +1,4 @@
-IRPF90 = irpf90 --codelet=jastrow_full:1000 #-s nelec:10 -s nnuc:2 -s ncord:5 #-a -d
+IRPF90 = irpf90 --codelet=factor_een_blas:1000 #-s nelec:10 -s nnuc:2 -s ncord:5 #-a -d
 FC     = ifort -xHost -g -mkl=sequential 
 FCFLAGS= -O2 -ffree-line-length-none -I .
 NINJA  = ninja
