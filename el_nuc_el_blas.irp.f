@@ -1,22 +1,15 @@
- BEGIN_PROVIDER [ double precision, factor_een_blas ]
-&BEGIN_PROVIDER [ double precision, factor_een_deriv_e_blas, (4, nelec) ]
+ BEGIN_PROVIDER [ double precision,  tmp_c, (nelec,nnuc,0:ncord,0:ncord-1) ]
+&BEGIN_PROVIDER [ double precision, dtmp_c, (4, nelec,nnuc,0:ncord,0:ncord-1) ]
  implicit none
  BEGIN_DOC
- ! Dimensions 1-3 : dx, dy, dz
- ! Dimension 4 : d2x + d2y + d2z
+ ! Calculate the intermediate buffers
+ ! tmp_c:
+ ! r_{ij}^k . R_{ja}^l -> tmp_c_{ia}^{kl}
+ !
+ ! dtmp_c:
+ ! dr_{ij}^k . R_{ja}^l -> dtmp_c_{ia}^{kl}
  END_DOC
-
- integer                        :: i, j, a, p, k, l, lmax, m, n
- double precision               :: accu
- double precision,dimension(:),allocatable       :: cn
- double precision,dimension(:,:,:,:),allocatable       :: tmp_c
- double precision,dimension(:,:,:,:,:),allocatable       :: dtmp_c
- allocate(cn(ncord))
- allocate(tmp_c(nelec,nnuc,0:ncord,0:ncord-1))
- allocate(dtmp_c(4,nelec,nnuc,0:ncord,0:ncord-1))
-
- factor_een_blas = 0.0d0
- factor_een_deriv_e_blas(1:4,1:nelec) = 0.0d0
+ integer :: k
 
  ! r_{ij}^k . R_{ja}^l -> tmp_c_{ia}^{kl}
  do k=0,ncord-1
@@ -34,6 +27,25 @@
        dtmp_c(1,1,1,0,k), 4*size(dtmp_c,2))
  enddo
 
+
+ END_PROVIDER
+
+
+ BEGIN_PROVIDER [ double precision, factor_een_blas ]
+&BEGIN_PROVIDER [ double precision, factor_een_deriv_e_blas, (4, nelec) ]
+ implicit none
+ BEGIN_DOC
+ ! Dimensions 1-3 : dx, dy, dz
+ ! Dimension 4 : d2x + d2y + d2z
+ END_DOC
+
+ integer                        :: i, j, a, p, k, l, lmax, m, n
+ double precision               :: accu
+ double precision,dimension(:),allocatable       :: cn
+ allocate(cn(ncord))
+
+ factor_een_blas = 0.0d0
+ factor_een_deriv_e_blas(1:4,1:nelec) = 0.0d0
 
  do n = 1, dim_cord_vect
 
@@ -75,6 +87,4 @@
  enddo
 
  deallocate(cn)
- deallocate(tmp_c)
- deallocate(dtmp_c)
 END_PROVIDER
