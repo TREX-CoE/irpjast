@@ -7,10 +7,13 @@
  END_DOC
 
  integer                        :: i, j, a, p, k, l, lmax, m, n
- double precision               :: cn(ncord), accu
- double precision               :: f(nnuc,0:ncord-2,0:ncord-2)
- double precision               :: tmp_c(nelec,nnuc,0:ncord,0:ncord-1)
- double precision               :: dtmp_c(4,nelec,nnuc,0:ncord,0:ncord-1)
+ double precision               :: accu
+ double precision,dimension(:),allocatable       :: cn
+ double precision,dimension(:,:,:,:),allocatable       :: tmp_c
+ double precision,dimension(:,:,:,:,:),allocatable       :: dtmp_c
+ allocate(cn(ncord))
+ allocate(tmp_c(nelec,nnuc,0:ncord,0:ncord-1))
+ allocate(dtmp_c(4,nelec,nnuc,0:ncord,0:ncord-1))
 
  factor_een_blas = 0.0d0
  factor_een_deriv_e_blas(1:4,1:nelec) = 0.0d0
@@ -71,4 +74,7 @@
    enddo
  enddo
 
+ deallocate(cn)
+ deallocate(tmp_c)
+ deallocate(dtmp_c)
 END_PROVIDER
