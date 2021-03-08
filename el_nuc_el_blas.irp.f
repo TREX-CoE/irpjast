@@ -32,22 +32,20 @@ END_PROVIDER
 
 
  BEGIN_PROVIDER [ double precision, factor_een_blas ]
-&BEGIN_PROVIDER [ double precision, factor_een_deriv_e_blas, (4, nelec) ]
+&BEGIN_PROVIDER [ double precision, factor_een_deriv_e_blas, (nelec,4) ]
  implicit none
  BEGIN_DOC
  ! Dimensions 1-3 : dx, dy, dz
  ! Dimension 4 : d2x + d2y + d2z
  END_DOC
 
- integer                        :: i, j, a, p, k, l, lmax, m, n
+ integer                        :: i, j, a, p, k, l, lmax, m, n, ii
  double precision               :: accu
  double precision,dimension(:),allocatable :: cn
  allocate(cn(nnuc))
 
  factor_een_blas = 0.0d0
- factor_een_deriv_e_blas(1:4,1:nelec) = 0.0d0
-
- PROVIDE tmp_c dtmp_c
+ factor_een_deriv_e_blas(1:nelec,1:4) = 0.0d0
 
  do n = 1, dim_cord_vect
 
@@ -63,17 +61,22 @@ END_PROVIDER
    do a = 1, nnuc
      accu = 0.d0
 
+     do ii=1,4
+     do j=1,nelec
+
+       factor_een_deriv_e_blas(j,ii) = factor_een_deriv_e_blas(j,ii) + (&
+         tmp_c(j,a,m,k) * rescale_een_n_deriv_e(j,ii,a,m+l) +     &
+         dtmp_c(j,ii,a,m,k) * rescale_een_n(j,a,m+l) +            &
+         dtmp_c(j,ii,a,m+l,k) * rescale_een_n(j,a,m) +            &
+         tmp_c(j,a,m+l,k)*rescale_een_n_deriv_e(j,ii,a,m)         &
+         ) * cn(a)
+     enddo
+     enddo
+
      do j=1,nelec
        accu = accu + rescale_een_n(j,a,m) * tmp_c(j,a,m+l,k)
 
-       factor_een_deriv_e_blas(1:4,j) = factor_een_deriv_e_blas(1:4,j) + (&
-           tmp_c(j,a,m,k) * rescale_een_n_deriv_e(j,1:4,a,m+l) +     &
-           dtmp_c(j,1:4,a,m,k) * rescale_een_n(j,a,m+l) +            &
-           dtmp_c(j,1:4,a,m+l,k) * rescale_een_n(j,a,m) +            &
-           tmp_c(j,a,m+l,k)*rescale_een_n_deriv_e(j,1:4,a,m)         &
-           ) * cn(a)
-
-       factor_een_deriv_e_blas(4,j) = factor_een_deriv_e_blas(4,j) + (&
+       factor_een_deriv_e_blas(j,4) = factor_een_deriv_e_blas(j,4) + (&
            dtmp_c(j,1,a,m  ,k) * rescale_een_n_deriv_e(j,1,a,m+l) +  &
            dtmp_c(j,2,a,m  ,k) * rescale_een_n_deriv_e(j,2,a,m+l) +  &
            dtmp_c(j,3,a,m  ,k) * rescale_een_n_deriv_e(j,3,a,m+l) +  &
