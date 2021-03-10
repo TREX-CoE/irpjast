@@ -3,7 +3,7 @@ program codelet_factor_een_blas
   implicit none
   integer :: i
   double precision :: ticks_0, ticks_1, cpu_0, cpu_1
-  integer, parameter :: irp_imax = 100
+  integer*8 :: irp_imax 
 
 
   PROVIDE factor_een_blas tmp_c 
@@ -11,6 +11,8 @@ program codelet_factor_een_blas
   call provide_factor_een_blas
 
   double precision :: irp_rdtsc
+
+  irp_imax = max(1_8,20_8 * 125000000_8 /(int(nelec,8) * int(nelec,8) * int(nnuc,8) * ncord))
 
   call cpu_time(cpu_0)
   ticks_0 = irp_rdtsc()
