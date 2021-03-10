@@ -1,7 +1,7 @@
-IRPF90 = irpf90/bin/irpf90 # --codelet=jastrow_full:1000 #-s nelec:10 -s nnuc:2 -s ncord:5 #-a -d
-FC     = ifort -xHost -g -mkl=sequential
+IRPF90 = irpf90/bin/irpf90 --codelet=factor_een:2 #-s nelec:10 -s nnuc:2 -s ncord:5 #-a -d
+FC     = ifort -xCORE-AVX512 -g -mkl=sequential
 FCFLAGS= -O2 -I .
-AR = ar
+NINJA  = ninja
 ARCHIVE = ar crs
 RANLIB = ranlib
 

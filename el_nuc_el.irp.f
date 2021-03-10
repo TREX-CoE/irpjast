@@ -95,24 +95,24 @@ BEGIN_PROVIDER [ double precision, factor_een_deriv_e, (4, nelec) ]
               rescale_een_e(i,j,k) *                                 &
               rescale_een_n(i,a,m+l)
           daccu(1:4) = daccu(1:4) +                                  &
-              rescale_een_e_deriv_e_t(1:4,i,j,k) *                   &
+              rescale_een_e_deriv_e_t(i,1:4,j,k) *                   &
               rescale_een_n(i,a,m)
           daccu2(1:4) = daccu2(1:4) +                                &
-              rescale_een_e_deriv_e_t(1:4,i,j,k) *                   &
+              rescale_een_e_deriv_e_t(i,1:4,j,k) *                   &
               rescale_een_n(i,a,m+l)
           
         enddo
         factor_een_deriv_e(1:4,j) = factor_een_deriv_e(1:4,j) +      &
-            (accu * rescale_een_n_deriv_e(1:4,j,a,m+l) + daccu(1:4) * rescale_een_n(j,a,m+l) +&
-            daccu2(1:4)* rescale_een_n(j,a,m) + accu2*rescale_een_n_deriv_e(1:4,j,a,m)) * cn
+            (accu * rescale_een_n_deriv_e(j,1:4,a,m+l) + daccu(1:4) * rescale_een_n(j,a,m+l) +&
+            daccu2(1:4)* rescale_een_n(j,a,m) + accu2*rescale_een_n_deriv_e(j,1:4,a,m)) * cn
         
         factor_een_deriv_e(4,j) = factor_een_deriv_e(4,j) + 2.d0*(   &
-            daccu (1) * rescale_een_n_deriv_e(1,j,a,m+l) +           &
-            daccu (2) * rescale_een_n_deriv_e(2,j,a,m+l) +           &
-            daccu (3) * rescale_een_n_deriv_e(3,j,a,m+l) +           &
-            daccu2(1) * rescale_een_n_deriv_e(1,j,a,m  ) +           &
-            daccu2(2) * rescale_een_n_deriv_e(2,j,a,m  ) +           &
-            daccu2(3) * rescale_een_n_deriv_e(3,j,a,m  ) )*cn
+            daccu (1) * rescale_een_n_deriv_e(j,1,a,m+l) +           &
+            daccu (2) * rescale_een_n_deriv_e(j,2,a,m+l) +           &
+            daccu (3) * rescale_een_n_deriv_e(j,3,a,m+l) +           &
+            daccu2(1) * rescale_een_n_deriv_e(j,1,a,m  ) +           &
+            daccu2(2) * rescale_een_n_deriv_e(j,2,a,m  ) +           &
+            daccu2(3) * rescale_een_n_deriv_e(j,3,a,m  ) )*cn
       enddo
     enddo
   enddo
@@ -152,8 +152,8 @@ BEGIN_PROVIDER [ double precision, factor_een_deriv_e_ref, (4, nelec) ]
                 rjam_cn = rescale_een_n(j, a, m) * cn
 
                 do ii = 1, 4
-                   drjal(ii) = rescale_een_n_deriv_e(ii, j, a, l)
-                   drjam_cn(ii) = rescale_een_n_deriv_e(ii, j, a, m) * cn
+                   drjal(ii) = rescale_een_n_deriv_e(j, ii, a, l)
+                   drjam_cn(ii) = rescale_een_n_deriv_e(j, ii, a, m) * cn
                 enddo
 
                 do i = 1, nelec
@@ -162,7 +162,7 @@ BEGIN_PROVIDER [ double precision, factor_een_deriv_e_ref, (4, nelec) ]
                    rijk = rescale_een_e(i, j, k)
 
                    do ii = 1, 4
-                      drijk(ii) = rescale_een_e_deriv_e(ii, j, i, k)
+                      drijk(ii) = rescale_een_e_deriv_e(j, ii, i, k)
                    enddo
 
                    v1 = rijk * rial    ! v(x)

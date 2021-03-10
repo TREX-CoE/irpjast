@@ -1,24 +1,26 @@
 
-program codelet_factor_een
+program codelet_factor_een_blas
   implicit none
   integer :: i
   double precision :: ticks_0, ticks_1, cpu_0, cpu_1
-  integer, parameter :: irp_imax = 100000
+  integer, parameter :: irp_imax = 200
 
-  
 
-  call provide_factor_een
+  PROVIDE factor_een_blas tmp_c 
+
+  call provide_factor_een_blas
 
   double precision :: irp_rdtsc
 
   call cpu_time(cpu_0)
   ticks_0 = irp_rdtsc()
   do i=1,irp_imax
-    call bld_factor_een
+    call bld_tmp_c
+    call bld_factor_een_blas
   enddo
   ticks_1 = irp_rdtsc()
   call cpu_time(cpu_1)
-  print *, 'factor_een'
+  print *, 'factor_een_blas'
   print *, '-----------'
   print *, 'Cycles:'
   print *,  (ticks_1-ticks_0)/dble(irp_imax)

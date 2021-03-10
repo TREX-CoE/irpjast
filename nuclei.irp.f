@@ -3,7 +3,9 @@ BEGIN_PROVIDER [ integer, nnuc ]
  BEGIN_DOC
  ! Number of nuclei
  END_DOC
- nnuc = 2
+ !nnuc = 2
+! read(*,*)nnuc
+ nnuc = nelec/5
 END_PROVIDER
 
 
@@ -14,7 +16,8 @@ BEGIN_PROVIDER [ integer, typenuc ]
  ! Type of the nuclei
  END_DOC
  typenuc = 1
- typenuc_arr = (/1, 1/)
+ !typenuc_arr = (/1, 1/)
+ typenuc_arr = 1
 END_PROVIDER
 
 

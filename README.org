@@ -34,3 +34,22 @@
   \sum_{i=1}^{Ne} \sum_{pkl} \sum_a^{Nn}
   c_{apkl} R_{ia}^{p-k-l}\, C_{i,a(p-k+l)}^k
   $$
+
+
+* Running
+
+#+begin_src bash :var Ratio=5 Natoms=500
+python ./generateData.py -a $Natoms -r $Ratio
+#+end_src
+
+Cela genere les trois fichiers:
+geometry.txt
+elec_coords.txt
+jast_coeffs.txt
+
+
+#+begin_src bash :var Natoms=500
+./codelet_factor_een_blas $Natoms
+#+end_src
+
+

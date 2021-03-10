@@ -186,7 +186,7 @@ BEGIN_PROVIDER [double precision, rescale_een_n, (nelec, nnuc, 0:ncord)]
 
 END_PROVIDER
 
-BEGIN_PROVIDER [double precision, rescale_een_n_deriv_e, (4, nelec, nnuc, 0:ncord)]
+BEGIN_PROVIDER [double precision, rescale_een_n_deriv_e, (nelec, 4, nnuc, 0:ncord)]
  implicit none
  BEGIN_DOC
  ! Derivative of the scaled distance J_{een} wrt R_{ia}
@@ -198,23 +198,23 @@ BEGIN_PROVIDER [double precision, rescale_een_n_deriv_e, (4, nelec, nnuc, 0:ncor
     kappa_l = - dble(l) * kappa
     do a = 1, nnuc
        do i = 1, nelec
-          ! r'(x) \lor r''(x)
           do ii = 1, 4
-             rescale_een_n_deriv_e(ii, i, a, l) = &
+          ! r'(x) \lor r''(x)
+             rescale_een_n_deriv_e(i, ii, a, l) = &
                   kappa_l * elnuc_dist_deriv_e(ii, i, a)
              !print *, "pp", ii, i, a, elnuc_dist_deriv_e(ii, i, a)
           enddo
 
           ! \left(r''(x)+r'(x)^2\right)
-          rescale_een_n_deriv_e(4, i, a, l) = rescale_een_n_deriv_e(4, i, a, l) + &
-          rescale_een_n_deriv_e(1, i, a, l) * rescale_een_n_deriv_e(1, i, a, l) + &
-          rescale_een_n_deriv_e(2, i, a, l) * rescale_een_n_deriv_e(2, i, a, l) + &
-          rescale_een_n_deriv_e(3, i, a, l) * rescale_een_n_deriv_e(3, i, a, l)
+          rescale_een_n_deriv_e(i, 4, a, l) = rescale_een_n_deriv_e(i, 4, a, l) + &
+          rescale_een_n_deriv_e(i, 1, a, l) * rescale_een_n_deriv_e(i, 1, a, l) + &
+          rescale_een_n_deriv_e(i, 2, a, l) * rescale_een_n_deriv_e(i, 2, a, l) + &
+          rescale_een_n_deriv_e(i, 3, a, l) * rescale_een_n_deriv_e(i, 3, a, l)
 
           ! \times e^{r(x)}
           do ii = 1, 4
-             rescale_een_n_deriv_e(ii, i, a, l) = &
-                 rescale_een_n_deriv_e(ii, i, a, l) * rescale_een_n(i, a, l)
+             rescale_een_n_deriv_e(i, ii, a, l) = &
+                 rescale_een_n_deriv_e(i, ii, a, l) * rescale_een_n(i, a, l)
           enddo
        enddo
     enddo
@@ -243,7 +243,7 @@ BEGIN_PROVIDER [double precision, elnuc_dist_deriv_e, (4, nelec, nnuc)]
  end do
 END_PROVIDER
 
-BEGIN_PROVIDER [double precision, rescale_een_e_deriv_e, (4, nelec, nelec, 0:ncord)]
+BEGIN_PROVIDER [double precision, rescale_een_e_deriv_e, (nelec, 4, nelec, 0:ncord)]
  BEGIN_DOC
  ! Derivative of the scaled distance J_{een} wrt R_{ia}
  END_DOC
@@ -259,27 +259,27 @@ BEGIN_PROVIDER [double precision, rescale_een_e_deriv_e, (4, nelec, nelec, 0:nco
        do i = 1, nelec
           ! r'(x) \lor r''(x)
           do ii = 1, 4
-             rescale_een_e_deriv_e(ii, i, j, l) = &
+             rescale_een_e_deriv_e(i, ii, j, l) = &
                  kappa_l * elec_dist_deriv_e(ii, i, j)
           enddo
 
           ! \left(r''(x)+r'(x)^2\right)
-          rescale_een_e_deriv_e(4, i, j, l) = rescale_een_e_deriv_e(4, i, j, l) + &
-            rescale_een_e_deriv_e(1, i, j, l) * rescale_een_e_deriv_e(1, i, j, l) + &
-            rescale_een_e_deriv_e(2, i, j, l) * rescale_een_e_deriv_e(2, i, j, l) + &
-            rescale_een_e_deriv_e(3, i, j, l) * rescale_een_e_deriv_e(3, i, j, l)
+            rescale_een_e_deriv_e(i, 4, j, l) = rescale_een_e_deriv_e(i, 4, j, l) + &
+            rescale_een_e_deriv_e(i, 1, j, l) * rescale_een_e_deriv_e(i, 1, j, l) + &
+            rescale_een_e_deriv_e(i, 2, j, l) * rescale_een_e_deriv_e(i, 2, j, l) + &
+            rescale_een_e_deriv_e(i, 3, j, l) * rescale_een_e_deriv_e(i, 3, j, l)
 
           ! \times e^{r(x)}
           do ii = 1, 4
-             rescale_een_e_deriv_e(ii, i, j, l) = &
-                 rescale_een_e_deriv_e(ii, i, j, l) * rescale_een_e(i, j, l)
+             rescale_een_e_deriv_e(i, ii, j, l) = &
+                 rescale_een_e_deriv_e(i, ii, j, l) * rescale_een_e(i, j, l)
           enddo
        enddo
     enddo
  enddo
 END_PROVIDER
 
-BEGIN_PROVIDER [double precision, rescale_een_e_deriv_e_t, (4, nelec, nelec, 0:ncord)]
+BEGIN_PROVIDER [double precision, rescale_een_e_deriv_e_t, (nelec, 4, nelec, 0:ncord)]
   implicit none
   BEGIN_DOC
 ! Transposed rescale_een_e_deriv_e
@@ -288,7 +288,7 @@ BEGIN_PROVIDER [double precision, rescale_een_e_deriv_e_t, (4, nelec, nelec, 0:n
   do l=0,ncord
     do j=1,nelec
       do i=1,nelec
-        rescale_een_e_deriv_e_t(1:4,j,i,l) = rescale_een_e_deriv_e(1:4,i,j,l)
+        rescale_een_e_deriv_e_t(j,1:4,i,l) = rescale_een_e_deriv_e(i,1:4,j,l)
       enddo
     enddo
   enddo
