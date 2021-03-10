@@ -1,5 +1,5 @@
- BEGIN_PROVIDER [ double precision,  tmp_c, (nelec,nnuc,0:ncord,0:ncord-1) ]
-&BEGIN_PROVIDER [ double precision, dtmp_c, (nelec,4,nnuc,0:ncord,0:ncord-1) ]
+ BEGIN_PROVIDER [ double precision,  tmp_c, (nelec_8,nnuc,0:ncord,0:ncord-1) ]
+&BEGIN_PROVIDER [ double precision, dtmp_c, (nelec_8,4,nnuc,0:ncord,0:ncord-1) ]
  implicit none
  BEGIN_DOC
  ! Calculate the intermediate buffers
@@ -32,7 +32,7 @@ END_PROVIDER
 
 
  BEGIN_PROVIDER [ double precision, factor_een_blas ]
-&BEGIN_PROVIDER [ double precision, factor_een_deriv_e_blas, (nelec,4) ]
+&BEGIN_PROVIDER [ double precision, factor_een_deriv_e_blas, (nelec_8,4) ]
  implicit none
  BEGIN_DOC
  ! Dimensions 1-3 : dx, dy, dz
@@ -44,7 +44,7 @@ END_PROVIDER
 ! double precision,dimension(:),allocatable :: cn
 
  factor_een_blas = 0.0d0
- factor_een_deriv_e_blas(1:nelec,1:4) = 0.0d0
+ factor_een_deriv_e_blas(:,:) = 0.0d0
 
  do n = 1, dim_cord_vect
 

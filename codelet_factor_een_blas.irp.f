@@ -3,7 +3,7 @@ program codelet_factor_een_blas
   implicit none
   integer :: i
   double precision :: ticks_0, ticks_1, cpu_0, cpu_1
-  integer, parameter :: irp_imax = 200
+  integer, parameter :: irp_imax = 100
 
 
   PROVIDE factor_een_blas tmp_c 

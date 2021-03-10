@@ -8,6 +8,12 @@ BEGIN_PROVIDER [ integer, nnuc ]
  nnuc = nelec/5
 END_PROVIDER
 
+BEGIN_PROVIDER [ integer, nnuc_8 ]
+ implicit none
+ integer, external :: size_8
+ nnuc_8 = size_8(nnuc)
+END_PROVIDER
+
 
 BEGIN_PROVIDER [ integer, typenuc ]
 &BEGIN_PROVIDER [integer, typenuc_arr, (nnuc)]

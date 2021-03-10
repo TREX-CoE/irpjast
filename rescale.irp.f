@@ -14,7 +14,7 @@ BEGIN_PROVIDER [ double precision, kappa_inv ]
  kappa_inv = 1.0d0 / kappa
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, rescale_ee, (nelec, nelec) ]
+BEGIN_PROVIDER [ double precision, rescale_ee, (nelec_8, nelec) ]
  implicit none
  BEGIN_DOC
  ! R = (1 - exp(-kappa r))/kappa for electron-electron for $J_{ee}$
@@ -60,7 +60,7 @@ BEGIN_PROVIDER [ double precision, rescale_ee_deriv_e, (4, nelec, nelec) ]
  enddo
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, rescale_en, (nelec, nnuc) ]
+BEGIN_PROVIDER [ double precision, rescale_en, (nelec_8, nnuc) ]
  implicit none
  BEGIN_DOC
  ! R = (1 - exp(-kappa r))/kappa for electron-nucleus for $J_{en}$
@@ -102,7 +102,7 @@ BEGIN_PROVIDER [ double precision, rescale_en_deriv_e, (4, nelec, nnuc) ]
  enddo
 END_PROVIDER
 
-BEGIN_PROVIDER [double precision, rescale_een_e, (nelec, nelec, 0:ncord)]
+BEGIN_PROVIDER [double precision, rescale_een_e, (nelec_8, nelec, 0:ncord)]
  implicit none
  BEGIN_DOC
  ! R = exp(-kappa r) for electron-electron for $J_{een}$
@@ -159,7 +159,7 @@ BEGIN_PROVIDER [double precision, rescale_een_e_ij, (nelec*(nelec-1)/2, 0:ncord)
 
 END_PROVIDER
 
-BEGIN_PROVIDER [double precision, rescale_een_n, (nelec, nnuc, 0:ncord)]
+BEGIN_PROVIDER [double precision, rescale_een_n, (nelec_8, nnuc, 0:ncord)]
  implicit none
  BEGIN_DOC
  ! R = exp(-kappa r) for electron-electron for $J_{een}$
@@ -186,7 +186,7 @@ BEGIN_PROVIDER [double precision, rescale_een_n, (nelec, nnuc, 0:ncord)]
 
 END_PROVIDER
 
-BEGIN_PROVIDER [double precision, rescale_een_n_deriv_e, (nelec, 4, nnuc, 0:ncord)]
+BEGIN_PROVIDER [double precision, rescale_een_n_deriv_e, (nelec_8, 4, nnuc, 0:ncord)]
  implicit none
  BEGIN_DOC
  ! Derivative of the scaled distance J_{een} wrt R_{ia}
@@ -243,7 +243,7 @@ BEGIN_PROVIDER [double precision, elnuc_dist_deriv_e, (4, nelec, nnuc)]
  end do
 END_PROVIDER
 
-BEGIN_PROVIDER [double precision, rescale_een_e_deriv_e, (nelec, 4, nelec, 0:ncord)]
+BEGIN_PROVIDER [double precision, rescale_een_e_deriv_e, (nelec_8, 4, nelec, 0:ncord)]
  BEGIN_DOC
  ! Derivative of the scaled distance J_{een} wrt R_{ia}
  END_DOC
@@ -279,7 +279,7 @@ BEGIN_PROVIDER [double precision, rescale_een_e_deriv_e, (nelec, 4, nelec, 0:nco
  enddo
 END_PROVIDER
 
-BEGIN_PROVIDER [double precision, rescale_een_e_deriv_e_t, (nelec, 4, nelec, 0:ncord)]
+BEGIN_PROVIDER [double precision, rescale_een_e_deriv_e_t, (nelec_8, 4, nelec, 0:ncord)]
   implicit none
   BEGIN_DOC
 ! Transposed rescale_een_e_deriv_e
