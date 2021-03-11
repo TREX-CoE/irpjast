@@ -8,29 +8,6 @@ BEGIN_PROVIDER [ double precision, factor_een ]
    integer                        :: i, j, a, p, k, l, lmax, m, n
    double precision               :: cn, accu2, accu
 
-!   double precision :: ria_tmp(nelec,dim_cord_vect,nnuc)
-!   double precision :: rja_tmp(nelec,dim_cord_vect,nnuc)
-!
-!   do a = 1, nnuc
-!     do n = 1, dim_cord_vect
-!    
-!       l = lkpm_of_cindex(1,n)
-!       k = lkpm_of_cindex(2,n)
-!       p = lkpm_of_cindex(3,n)
-!       m = lkpm_of_cindex(4,n)
-!
-!       do i = 1, nelec
-!         ria_tmp(i,n,a) = rescale_een_n(i,a,m)
-!         rja_tmp(i,n,a) = rescale_een_n(i,a,m+l)
-!       enddo
-!     enddo
-!
-!   enddo
-
-
-   !  factor_een = factor_een_blas
-   !  return
-
    factor_een = 0.0d0
 
    do n = 1, dim_cord_vect
