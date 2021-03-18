@@ -40,7 +40,7 @@ END_PROVIDER
  END_DOC
 
  integer                        :: i, j, a, p, k, l, lmax, m, n, ii
- double precision               :: accu, cn
+ double precision               :: accu, cn, cn2
 ! double precision,dimension(:),allocatable :: cn
 
  factor_een_blas = 0.0d0
@@ -63,27 +63,38 @@ END_PROVIDER
      enddo
      factor_een_blas = factor_een_blas + accu * cn
 
+     cn2 = cn+cn
      do ii=1,4
        do j=1,nelec
          factor_een_deriv_e_blas(j,ii) = factor_een_deriv_e_blas(j,ii) + (&
-           tmp_c(j,a,m,k) * rescale_een_n_deriv_e(j,ii,a,m+l) +     &
-           dtmp_c(j,ii,a,m,k)   * rescale_een_n(j,a,m+l) +            &
-           dtmp_c(j,ii,a,m+l,k) * rescale_een_n(j,a,m) +            &
-           tmp_c(j,a,m+l,k)*rescale_een_n_deriv_e(j,ii,a,m)         &
-           ) * cn
+           tmp_c (j,a,m+l,k)     *rescale_een_n_deriv_e(j,ii,a,m) +       &
+           dtmp_c(j,ii,a,m+l,k) * rescale_een_n(j,a,m) ) * cn
        enddo
      enddo
 
-     cn = cn+cn
+     do j=1,nelec
+       factor_een_deriv_e_blas(j,4) = factor_een_deriv_e_blas(j,4) + (&
+           dtmp_c(j,1,a,m+l,k) * rescale_een_n_deriv_e(j,1,a,m  ) +  &
+           dtmp_c(j,2,a,m+l,k) * rescale_een_n_deriv_e(j,2,a,m  ) +  &
+           dtmp_c(j,3,a,m+l,k) * rescale_een_n_deriv_e(j,3,a,m  )    &
+           )*cn2
+     enddo
+
+
+     do ii=1,4
+       do j=1,nelec
+         factor_een_deriv_e_blas(j,ii) = factor_een_deriv_e_blas(j,ii) + (&
+           tmp_c(j,a,m,k)       * rescale_een_n_deriv_e(j,ii,a,m+l) +     &
+           dtmp_c(j,ii,a,m,k)   * rescale_een_n(j,a,m+l) ) * cn
+       enddo
+     enddo
+
      do j=1,nelec
        factor_een_deriv_e_blas(j,4) = factor_een_deriv_e_blas(j,4) + (&
            dtmp_c(j,1,a,m  ,k) * rescale_een_n_deriv_e(j,1,a,m+l) +  &
            dtmp_c(j,2,a,m  ,k) * rescale_een_n_deriv_e(j,2,a,m+l) +  &
-           dtmp_c(j,3,a,m  ,k) * rescale_een_n_deriv_e(j,3,a,m+l) +  &
-           dtmp_c(j,1,a,m+l,k) * rescale_een_n_deriv_e(j,1,a,m  ) +  &
-           dtmp_c(j,2,a,m+l,k) * rescale_een_n_deriv_e(j,2,a,m  ) +  &
-           dtmp_c(j,3,a,m+l,k) * rescale_een_n_deriv_e(j,3,a,m  )    &
-           )*cn
+           dtmp_c(j,3,a,m  ,k) * rescale_een_n_deriv_e(j,3,a,m+l)    &
+           )*cn2
      enddo
 
    enddo
