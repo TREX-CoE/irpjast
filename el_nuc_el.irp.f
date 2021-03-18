@@ -36,7 +36,7 @@ BEGIN_PROVIDER [ double precision, factor_een ]
 
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, factor_een_deriv_e, (4, nelec) ]
+BEGIN_PROVIDER [ double precision, factor_een_deriv_e, (nelec,4) ]
   implicit none
   BEGIN_DOC
 ! Derivative of the Jeen
@@ -45,10 +45,10 @@ BEGIN_PROVIDER [ double precision, factor_een_deriv_e, (4, nelec) ]
   integer                        :: i, j, a, p, k, l, lmax, m, n
   double precision               :: cn, accu, accu2, daccu(1:4), daccu2(1:4)
   
-!  factor_een_deriv_e(1:4,1:nelec) = factor_een_deriv_e_blas(1:4,1:nelec)
+!  factor_een_deriv_e(1:nelec,1:4) = factor_een_deriv_e_blas(1:4,1:nelec)
 !  return
   
-  factor_een_deriv_e(1:4,1:nelec) = 0.0d0
+  factor_een_deriv_e(1:nelec,1:4) = 0.0d0
   
   do n = 1, dim_cord_vect
     
@@ -79,11 +79,11 @@ BEGIN_PROVIDER [ double precision, factor_een_deriv_e, (4, nelec) ]
               rescale_een_n(i,a,m+l)
           
         enddo
-        factor_een_deriv_e(1:4,j) = factor_een_deriv_e(1:4,j) +      &
+        factor_een_deriv_e(j,1:4) = factor_een_deriv_e(j,1:4) +      &
             (accu * rescale_een_n_deriv_e(j,1:4,a,m+l) + daccu(1:4) * rescale_een_n(j,a,m+l) +&
             daccu2(1:4)* rescale_een_n(j,a,m) + accu2*rescale_een_n_deriv_e(j,1:4,a,m)) * cn
         
-        factor_een_deriv_e(4,j) = factor_een_deriv_e(4,j) + 2.d0*(   &
+        factor_een_deriv_e(j,4) = factor_een_deriv_e(j,4) + 2.d0*(   &
             daccu (1) * rescale_een_n_deriv_e(j,1,a,m+l) +           &
             daccu (2) * rescale_een_n_deriv_e(j,2,a,m+l) +           &
             daccu (3) * rescale_een_n_deriv_e(j,3,a,m+l) +           &
@@ -96,7 +96,7 @@ BEGIN_PROVIDER [ double precision, factor_een_deriv_e, (4, nelec) ]
 
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, factor_een_deriv_e_ref, (4, nelec) ]
+BEGIN_PROVIDER [ double precision, factor_een_deriv_e_ref, (nelec,4) ]
  implicit none
  BEGIN_DOC
  ! Dimensions 1-3 : dx, dy, dz
@@ -152,14 +152,14 @@ BEGIN_PROVIDER [ double precision, factor_een_deriv_e_ref, (4, nelec) ]
                       d2 = drjam_cn(ii) * riam
                       lap1 = lap1 + d1 * d2
                       lap2 = lap2 + drijk(ii) * drjal(ii)
-                      factor_een_deriv_e_ref(ii, j) = factor_een_deriv_e_ref(ii, j) + v1 * d2 + d1 * v2
+                      factor_een_deriv_e_ref(j,ii) = factor_een_deriv_e_ref(j,ii) + v1 * d2 + d1 * v2
                    enddo
 
                    ! v(x) u''(x) + 2 * u'(x) v'(x) + u(x) v''(x)
                    ii = 4
                    d1 = drijk(ii) * rial + rijk * drjal(ii) + lap2 + lap2
                    d2 = drjam_cn(ii) * riam
-                   factor_een_deriv_e_ref(ii, j) = factor_een_deriv_e_ref(ii, j) + v1 * d2 + d1 * v2 + lap1 + lap1
+                   factor_een_deriv_e_ref(j,ii) = factor_een_deriv_e_ref(j,ii) + v1 * d2 + d1 * v2 + lap1 + lap1
 
                 enddo
              enddo

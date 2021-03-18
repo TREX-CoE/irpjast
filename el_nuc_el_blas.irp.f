@@ -21,10 +21,12 @@
 
  ! dr_{ij}^k . R_{ja}^l -> dtmp_c_{ia}^{kl}
  do k=0,ncord-1
-   call dgemm('N','N', 4*nelec, nnuc*(ncord+1), nelec, 1.d0,         &
-       rescale_een_e_deriv_e(1,1,1,k), 4*size(rescale_een_e_deriv_e,1),&
-       rescale_een_n(1,1,0), size(rescale_een_n,1), 0.d0,            &
-       dtmp_c(1,1,1,0,k), 4*size(dtmp_c,1))
+   call dgemm('N','N', 4*nelec_8, nnuc*(ncord+1), nelec, 1.d0,         &
+       rescale_een_e_deriv_e(1,1,1,k),                               &
+       size(rescale_een_e_deriv_e,1)*size(rescale_een_e_deriv_e,2),  &
+       rescale_een_n(1,1,0),                                         &
+       size(rescale_een_n,1), 0.d0,                                  &
+       dtmp_c(1,1,1,0,k), size(dtmp_c,1)*size(dtmp_c,2))
  enddo
 
 
@@ -79,7 +81,6 @@ END_PROVIDER
            dtmp_c(j,3,a,m+l,k) * rescale_een_n_deriv_e(j,3,a,m  )    &
            )*cn2
      enddo
-
 
      do ii=1,4
        do j=1,nelec
