@@ -1,6 +1,6 @@
 IRPF90 = irpf90 #--codelet=factor_een_blas:2 #-s nelec:10 -s nnuc:2 -s ncord:5 #-a -d
-FC     = ifort -xHost -g -mkl=parallel
-FCFLAGS= -O2 -ffree-line-length-none -I .
+FC     = ifort -check all -mkl=parallel -g #-xHost 
+FCFLAGS= #-O2 -ffree-line-length-none -I .
 NINJA  = ninja
 AR = ar 
 ARCHIVE = ar crs

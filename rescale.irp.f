@@ -14,7 +14,7 @@ BEGIN_PROVIDER [ double precision, kappa_inv ]
  kappa_inv = 1.0d0 / kappa
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, rescale_ee, (nelec, nelec) ]
+BEGIN_PROVIDER [ double precision, rescale_ee, (nelec_16, nelec_16) ]
  implicit none
  BEGIN_DOC
  ! R = (1 - exp(-kappa r))/kappa for electron-electron for $J_{ee}$
@@ -32,7 +32,7 @@ BEGIN_PROVIDER [ double precision, rescale_ee, (nelec, nelec) ]
  enddo
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, rescale_ee_deriv_e, (4, nelec, nelec) ]
+BEGIN_PROVIDER [ double precision, rescale_ee_deriv_e, (4, nelec_16, nelec_16) ]
  implicit none
  BEGIN_DOC
  ! R = (1 - exp(-kappa r))/kappa derived wrt x
@@ -60,7 +60,7 @@ BEGIN_PROVIDER [ double precision, rescale_ee_deriv_e, (4, nelec, nelec) ]
  enddo
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, rescale_en, (nelec, nnuc) ]
+BEGIN_PROVIDER [ double precision, rescale_en, (nelec_16, nnuc_16) ]
  implicit none
  BEGIN_DOC
  ! R = (1 - exp(-kappa r))/kappa for electron-nucleus for $J_{en}$
@@ -74,7 +74,7 @@ BEGIN_PROVIDER [ double precision, rescale_en, (nelec, nnuc) ]
  enddo
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, rescale_en_deriv_e, (4, nelec, nnuc) ]
+BEGIN_PROVIDER [ double precision, rescale_en_deriv_e, (4, nelec_16, nnuc_16) ]
  implicit none
  BEGIN_DOC
  ! R = (1 - exp(-kappa r))/kappa derived wrt x
@@ -102,7 +102,7 @@ BEGIN_PROVIDER [ double precision, rescale_en_deriv_e, (4, nelec, nnuc) ]
  enddo
 END_PROVIDER
 
-BEGIN_PROVIDER [double precision, rescale_een_e, (nelec, nelec, 0:ncord)]
+BEGIN_PROVIDER [double precision, rescale_een_e, (nelec_16, nelec_16, 0:ncord)]
  implicit none
  BEGIN_DOC
  ! R = exp(-kappa r) for electron-electron for $J_{een}$
@@ -132,7 +132,7 @@ BEGIN_PROVIDER [double precision, rescale_een_e, (nelec, nelec, 0:ncord)]
  enddo
 END_PROVIDER
 
-BEGIN_PROVIDER [double precision, rescale_een_e_ij, (nelec*(nelec-1)/2, 0:ncord)]
+BEGIN_PROVIDER [double precision, rescale_een_e_ij, (nelec_16*(nelec_16-1)/2, 0:ncord)]
  implicit none
  BEGIN_DOC
  ! R = exp(-kappa r) for electron-electron for $J_{een}$
@@ -159,7 +159,7 @@ BEGIN_PROVIDER [double precision, rescale_een_e_ij, (nelec*(nelec-1)/2, 0:ncord)
 
 END_PROVIDER
 
-BEGIN_PROVIDER [double precision, rescale_een_n, (nelec, nnuc, 0:ncord)]
+BEGIN_PROVIDER [double precision, rescale_een_n, (nelec_16, nnuc_16, 0:ncord)]
  implicit none
  BEGIN_DOC
  ! R = exp(-kappa r) for electron-electron for $J_{een}$
@@ -186,7 +186,7 @@ BEGIN_PROVIDER [double precision, rescale_een_n, (nelec, nnuc, 0:ncord)]
 
 END_PROVIDER
 
-BEGIN_PROVIDER [double precision, rescale_een_n_deriv_e, (nelec, 4, nnuc, 0:ncord)]
+BEGIN_PROVIDER [double precision, rescale_een_n_deriv_e, (nelec_16, 4, nnuc_16, 0:ncord)]
  implicit none
  BEGIN_DOC
  ! Derivative of the scaled distance J_{een} wrt R_{ia}
@@ -221,7 +221,7 @@ BEGIN_PROVIDER [double precision, rescale_een_n_deriv_e, (nelec, 4, nnuc, 0:ncor
  enddo
 END_PROVIDER
 
-BEGIN_PROVIDER [double precision, elnuc_dist_deriv_e, (4, nelec, nnuc)]
+BEGIN_PROVIDER [double precision, elnuc_dist_deriv_e, (4, nelec_16, nnuc)]
  BEGIN_DOC
  ! Derivative of R_{ia} wrt x
  ! Dimensions 1-3 : dx, dy, dz
@@ -243,7 +243,7 @@ BEGIN_PROVIDER [double precision, elnuc_dist_deriv_e, (4, nelec, nnuc)]
  end do
 END_PROVIDER
 
-BEGIN_PROVIDER [double precision, rescale_een_e_deriv_e, (nelec, 4, nelec, 0:ncord)]
+BEGIN_PROVIDER [double precision, rescale_een_e_deriv_e, (nelec_16, 4, nelec_16, 0:ncord)]
  BEGIN_DOC
  ! Derivative of the scaled distance J_{een} wrt R_{ia}
  END_DOC
@@ -279,7 +279,7 @@ BEGIN_PROVIDER [double precision, rescale_een_e_deriv_e, (nelec, 4, nelec, 0:nco
  enddo
 END_PROVIDER
 
-BEGIN_PROVIDER [double precision, rescale_een_e_deriv_e_t, (nelec, 4, nelec, 0:ncord)]
+BEGIN_PROVIDER [double precision, rescale_een_e_deriv_e_t, (nelec_16, 4, nelec_16, 0:ncord)]
   implicit none
   BEGIN_DOC
 ! Transposed rescale_een_e_deriv_e
@@ -295,7 +295,7 @@ BEGIN_PROVIDER [double precision, rescale_een_e_deriv_e_t, (nelec, 4, nelec, 0:n
 END_PROVIDER
 
 
-BEGIN_PROVIDER [double precision, elec_dist_deriv_e, (4, nelec, nelec)]
+BEGIN_PROVIDER [double precision, elec_dist_deriv_e, (4, nelec_16, nelec_16)]
  BEGIN_DOC
  ! Derivative of R_{ij} wrt x
  ! Dimensions 1-3 : dx, dy, dz

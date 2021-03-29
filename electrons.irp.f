@@ -7,6 +7,14 @@ BEGIN_PROVIDER [ integer, nelec ]
  read(*,*)nelec
 END_PROVIDER
 
+BEGIN_PROVIDER [ integer, nelec_16 ]
+ implicit none
+ BEGIN_DOC
+ ! Number of electrons multiples of 16
+ END_DOC
+ nelec_16 = ((nelec/16) + 1)*16
+END_PROVIDER
+
 BEGIN_PROVIDER [ integer, nelec_up ]
  implicit none
  BEGIN_DOC
@@ -15,8 +23,16 @@ BEGIN_PROVIDER [ integer, nelec_up ]
  nelec_up = nelec/2
 END_PROVIDER
 
+BEGIN_PROVIDER [ integer, nelec_up_16 ]
+ implicit none
+ BEGIN_DOC
+ ! Number of alpha and beta electrons
+ END_DOC
+ nelec_up = ((nelec_up/16) + 1)*16
+END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, elec_coord, (nelec, 3) ]
+
+BEGIN_PROVIDER [ double precision, elec_coord, (nelec_16, 3) ]
  implicit none
  BEGIN_DOC
  ! Electron coordinates
@@ -34,7 +50,7 @@ BEGIN_PROVIDER [ double precision, elec_coord, (nelec, 3) ]
 
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, elec_dist, (nelec, nelec) ]
+BEGIN_PROVIDER [ double precision, elec_dist, (nelec_16, nelec_16) ]
  implicit none
  BEGIN_DOC
  ! e-e distance
@@ -109,7 +125,7 @@ BEGIN_PROVIDER [double precision, factor_ee]
 
 END_PROVIDER
 
-BEGIN_PROVIDER [double precision, factor_ee_deriv_e, (4, nelec) ]
+BEGIN_PROVIDER [double precision, factor_ee_deriv_e, (4, nelec_16) ]
  implicit none
  BEGIN_DOC
  ! Dimensions 1-3 : dx, dy, dz

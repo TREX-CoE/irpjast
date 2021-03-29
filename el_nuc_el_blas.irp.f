@@ -1,5 +1,5 @@
- BEGIN_PROVIDER [ double precision,  tmp_c, (nelec,nnuc,0:ncord,0:ncord-1) ]
-&BEGIN_PROVIDER [ double precision, dtmp_c, (nelec,4,nnuc,0:ncord,0:ncord-1) ]
+ BEGIN_PROVIDER [ double precision,  tmp_c, (nelec_16,nnuc_16,0:ncord,0:ncord-1) ]
+&BEGIN_PROVIDER [ double precision, dtmp_c, (nelec_16,4,nnuc_16,0:ncord,0:ncord-1) ]
  implicit none
  BEGIN_DOC
  ! Calculate the intermediate buffers
@@ -13,7 +13,7 @@
 
  ! r_{ij}^k . R_{ja}^l -> tmp_c_{ia}^{kl}
  do k=0,ncord-1
-   call dgemm('N','N', nelec, nnuc*(ncord+1), nelec, 1.d0,           &
+   call dgemm('N','N', nelec_16, nnuc_16*(ncord+1), nelec_16, 1.d0,           &
        rescale_een_e(1,1,k), size(rescale_een_e,1),                  &
        rescale_een_n(1,1,0), size(rescale_een_n,1), 0.d0,            &
        tmp_c(1,1,0,k), size(tmp_c,1))
@@ -21,7 +21,7 @@
 
  ! dr_{ij}^k . R_{ja}^l -> dtmp_c_{ia}^{kl}
  do k=0,ncord-1
-   call dgemm('N','N', 4*nelec, nnuc*(ncord+1), nelec, 1.d0,         &
+   call dgemm('N','N', 4*nelec_16, nnuc_16*(ncord+1), nelec, 1.d0,         &
        rescale_een_e_deriv_e(1,1,1,k), 4*size(rescale_een_e_deriv_e,1),&
        rescale_een_n(1,1,0), size(rescale_een_n,1), 0.d0,            &
        dtmp_c(1,1,1,0,k), 4*size(dtmp_c,1))
@@ -32,7 +32,7 @@ END_PROVIDER
 
 
  BEGIN_PROVIDER [ double precision, factor_een_blas ]
-&BEGIN_PROVIDER [ double precision, factor_een_deriv_e_blas, (nelec,4) ]
+&BEGIN_PROVIDER [ double precision, factor_een_deriv_e_blas, (nelec_16,4) ]
  implicit none
  BEGIN_DOC
  ! Dimensions 1-3 : dx, dy, dz
@@ -44,7 +44,7 @@ END_PROVIDER
 ! double precision,dimension(:),allocatable :: cn
 
  factor_een_blas = 0.0d0
- factor_een_deriv_e_blas(1:nelec,1:4) = 0.0d0
+ factor_een_deriv_e_blas(1:nelec_16,1:4) = 0.0d0
 
  do n = 1, dim_cord_vect
 

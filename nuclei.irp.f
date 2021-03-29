@@ -8,6 +8,14 @@ BEGIN_PROVIDER [ integer, nnuc ]
  nnuc = nelec/5
 END_PROVIDER
 
+BEGIN_PROVIDER [ integer, nnuc_16 ]
+ implicit none
+ BEGIN_DOC
+ ! Number of nuclei factor of 16
+ END_DOC
+ nnuc_16 = ((nnuc/16) + 1)*16
+END_PROVIDER
+
 
 BEGIN_PROVIDER [ integer, typenuc ]
 &BEGIN_PROVIDER [integer, typenuc_arr, (nnuc)]
@@ -39,7 +47,7 @@ BEGIN_PROVIDER [ double precision, nuc_coord, (nnuc, 3) ]
 
 END_PROVIDER
 
-BEGIN_PROVIDER [ double precision, elnuc_dist, (nelec, nnuc) ]
+BEGIN_PROVIDER [ double precision, elnuc_dist, (nelec_16, nnuc_16) ]
  implicit none
  BEGIN_DOC
  ! e-n distance
@@ -84,7 +92,7 @@ BEGIN_PROVIDER [double precision, factor_en]
 
 END_PROVIDER
 
-BEGIN_PROVIDER [double precision, factor_en_deriv_e, (4, nelec) ]
+BEGIN_PROVIDER [double precision, factor_en_deriv_e, (4, nelec_16) ]
  implicit none
  BEGIN_DOC
  ! Dimensions 1-3 : dx, dy, dz
