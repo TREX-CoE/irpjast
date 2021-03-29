@@ -8,12 +8,14 @@ BEGIN_PROVIDER [ integer, nnuc ]
  nnuc = nelec/5
 END_PROVIDER
 
-BEGIN_PROVIDER [ integer, nnuc_16 ]
+ BEGIN_PROVIDER [ integer, nnuc_16 ]
+&BEGIN_PROVIDER [ integer, ntiles_nnuc ]
  implicit none
  BEGIN_DOC
- ! Number of nuclei factor of 16
+ ! Number of nuclei factor of tile_size
  END_DOC
- nnuc_16 = ((nnuc/16) + 1)*16
+ nnuc_16 = ((nnuc/tile_size) + 1)*tile_size
+ ntiles_nnuc = nnuc_16/tile_size
 END_PROVIDER
 
 

@@ -7,12 +7,14 @@ BEGIN_PROVIDER [ integer, nelec ]
  read(*,*)nelec
 END_PROVIDER
 
-BEGIN_PROVIDER [ integer, nelec_16 ]
+ BEGIN_PROVIDER [ integer, nelec_16 ]
+&BEGIN_PROVIDER [ integer, ntiles_nelec ]
  implicit none
  BEGIN_DOC
- ! Number of electrons multiples of 16
+ ! Number of electrons multiples of tile_size
  END_DOC
- nelec_16 = ((nelec/16) + 1)*16
+ nelec_16 = ((nelec/tile_size) + 1)*tile_size
+ ntiles_nelec = nelec_16/tile_size
 END_PROVIDER
 
 BEGIN_PROVIDER [ integer, nelec_up ]
@@ -28,7 +30,7 @@ BEGIN_PROVIDER [ integer, nelec_up_16 ]
  BEGIN_DOC
  ! Number of alpha and beta electrons
  END_DOC
- nelec_up = ((nelec_up/16) + 1)*16
+ nelec_up_16 = ((nelec_up/tile_size) + 1)*tile_size
 END_PROVIDER
 
 
