@@ -84,9 +84,9 @@ END_PROVIDER
      do j = 0, ntiles_nelec - 1
        do a = 0, ntiles_nnuc - 1
    call dgemm('N','N', tile_size, tile_size*(ncord+1), tile_size, 1.d0,           &
-       rescale_een_e_tiled(1,1,i,j,k), size(rescale_een_e_tiled,1),                  &
-       rescale_een_n_tiled(1,1,0,i,a), size(rescale_een_n_tiled,1), 0.d0,            &
-       tmp_c_tiled(1,1,0,i,a,k), size(tmp_c_tiled,1))
+       rescale_een_e_tiled(1,1,j,i,k), size(rescale_een_e_tiled,1),                  &
+       rescale_een_n_tiled(1,1,0,i,a), size(rescale_een_n_tiled,1), 1.d0,            &
+       tmp_c_tiled(1,1,0,j,a,k), size(tmp_c_tiled,1))
        enddo
      enddo
    enddo
@@ -97,10 +97,10 @@ END_PROVIDER
    do i = 0, ntiles_nelec - 1
      do j = 0, ntiles_nelec - 1
        do a = 0, ntiles_nnuc - 1
-   call dgemm('N','N', 4*tile_size, tile_size*(ncord+1), nelec, 1.d0,         &
-       rescale_een_e_deriv_e_tiled(1,1,1,k,i,a), 4*size(rescale_een_e_deriv_e_tiled,1),&
-       rescale_een_n_tiled(1,1,0,i,a), size(rescale_een_n_tiled,1), 0.d0,            &
-       dtmp_c_tiled(1,1,1,0,i,a,k), 4*size(dtmp_c_tiled,1))
+   call dgemm('N','N', 4*tile_size, tile_size*(ncord+1), tile_size, 1.d0,         &
+       rescale_een_e_deriv_e_tiled(1,1,1,k,j,i), 4*size(rescale_een_e_deriv_e_tiled,1),&
+       rescale_een_n_tiled(1,1,0,i,a), size(rescale_een_n_tiled,1), 1.d0,            &
+       dtmp_c_tiled(1,1,1,0,j,a,k), 4*size(dtmp_c_tiled,1))
        enddo
      enddo
    enddo
