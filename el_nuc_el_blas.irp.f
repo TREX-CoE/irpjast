@@ -90,22 +90,43 @@ END_PROVIDER
    enddo
  enddo
 
- do k=0,ncord-1
-  do l=0,ncord
-   do i = 0, ntiles_nelec - 1
-    do a = 0, ntiles_nnuc - 1
-      do ii = 1, tile_size
-       idxi = i*tile_size + ii
-       do aa = 1, tile_size
-         idxa = a*tile_size + aa
-         if(abs(tmp_c(idxi,idxa,l,k)-tmp_c_tiled(ii,aa,l,i,a,k)) .GT. 1e-10) then
-         print *,"----",abs(tmp_c(idxi,idxa,l,k)-tmp_c_tiled(ii,aa,l,i,a,k))
-         endif
-       enddo
-      enddo
-    enddo
-   enddo
-  enddo
- enddo
+ !! TESTING !!
+ !do k=0,ncord-1
+ ! do l=0,ncord
+ !  do i = 0, ntiles_nelec - 1
+ !   do a = 0, ntiles_nnuc - 1
+ !     do ii = 1, tile_size
+ !      idxi = i*tile_size + ii
+ !      do aa = 1, tile_size
+ !        idxa = a*tile_size + aa
+ !        if(abs(tmp_c(idxi,idxa,l,k)-tmp_c_tiled(ii,aa,l,i,a,k)) .GT. 1e-10) then
+ !        print *,"----",abs(tmp_c(idxi,idxa,l,k)-tmp_c_tiled(ii,aa,l,i,a,k))
+ !        endif
+ !      enddo
+ !     enddo
+ !   enddo
+ !  enddo
+ ! enddo
+ !enddo
+
+ !do k=0,ncord-1
+ ! do l=0,ncord
+ ! do m=1,4
+ !  do i = 0, ntiles_nelec - 1
+ !   do a = 0, ntiles_nnuc - 1
+ !     do ii = 1, tile_size
+ !      idxi = i*tile_size + ii
+ !      do aa = 1, tile_size
+ !        idxa = a*tile_size + aa
+ !        if(abs(dtmp_c(idxi,m,idxa,l,k)-dtmp_c_tiled(ii,m,aa,l,i,a,k)) .GT. 1e-10) then
+ !        print *,"----",abs(tmp_c(idxi,idxa,l,k)-tmp_c_tiled(ii,aa,l,i,a,k))
+ !        endif
+ !      enddo
+ !     enddo
+ !   enddo
+ !  enddo
+ ! enddo
+ ! enddo
+ !enddo
 
 END_PROVIDER
