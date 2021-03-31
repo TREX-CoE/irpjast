@@ -1,5 +1,5 @@
-FC     = ifort -check all -mkl=parallel -g -I$(PWD) #-xHost 
-CPP    = g++ -O2 -Wall
+FC     = ifort -mkl=parallel -march=native -g -I$(PWD) #-xHost -check all 
+CPP    = g++ -O2 -march=native # -Wall
 FCFLAGS= #-O2 -ffree-line-length-none -I .
 NINJA  = ninja
 AR = ar
@@ -21,12 +21,12 @@ MAGMA_F90FLAGS := -I$(MAGMADIR)/include -Dmagma_devptr_t="integer(kind=8)"
 MAGMA_LIBS   := -L$(MAGMADIR)/lib -L$(CUDADIR)/lib64 -L$(OPENBLASDIR)/lib \
                 -lmagma -lcublas -lcudart -lmkl
 
-IRPF90 = irpf90/bin/irpf90 --codelet=elec_dist:1000
+IRPF90 = irpf90 --codelet=elec_dist:1000 -s tile_size:16 
 -include irpf90.make
 export
 
 irpf90.make: fortran.o tiling_interface.o magma_dgemm_async_gpu.o $(filter-out IRPF90_temp/%, $(wildcard */*.irp.f)) $(wildcard *.irp.f) $(wildcard *.inc.f) Makefile
-        $(IRPF90)
+	$(IRPF90)
 
 magma_dgemm_async_gpu.o: 
 	${CPP} $(CFLAGS) $(MAGMA_CFLAGS) -DCUBLAS_GFORTRAN -c magma_dgemm_async_gpu.cc -o magma_dgemm_async_gpu.o
