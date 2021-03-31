@@ -77,7 +77,7 @@ END_PROVIDER
  ! dtmp_c:
  ! dr_{ij}^k . R_{ja}^l -> dtmp_c_{ia}^{kl}
  END_DOC
- integer :: k, i, j, a
+ integer :: k, i, j, a, l,m
  integer :: res
 
  ! r_{ij}^k . R_{ja}^l -> tmp_c_{ia}^{kl}
@@ -85,18 +85,18 @@ END_PROVIDER
    do i = 0, ntiles_nelec - 1
      do j = 0, ntiles_nelec - 1
        do a = 0, ntiles_nnuc - 1
-   !call dgemm('N','N', tile_size, tile_size*(ncord+1), tile_size, 1.d0,           &
-   !    rescale_een_e_tiled(1,1,j,i,k), size(rescale_een_e_tiled,1),                  &
-   !    rescale_een_n_tiled(1,1,0,i,a), size(rescale_een_n_tiled,1), 1.d0,            &
-   !    tmp_c_tiled(1,1,0,j,a,k), size(tmp_c_tiled,1))
    call run_magma_dgemm_async_gpu_c(rescale_een_e_tiled(1,1,j,i,k),       &
                                    rescale_een_n_tiled(1,1,0,i,a), &
                                    tmp_c_tiled(1,1,0,j,a,k),       &
-                                   tile_size, tile_size,           &
+                                   tile_size, tile_size*(ncord+1), &
                                    tile_size,                      &
                                    size(rescale_een_e_tiled,1),    &
                                    size(rescale_een_n_tiled,1),    &
                                    size(tmp_c_tiled,1))
+   !call dgemm('N','N', tile_size, tile_size*(ncord+1), tile_size, 1.d0,           &
+   !    rescale_een_e_tiled(1,1,j,i,k), size(rescale_een_e_tiled,1),                  &
+   !    rescale_een_n_tiled(1,1,0,i,a), size(rescale_een_n_tiled,1), 1.d0,            &
+   !    tmp_c_tiled(1,1,0,j,a,k), size(tmp_c_tiled,1))
        enddo
      enddo
    enddo
