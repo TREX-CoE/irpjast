@@ -103,12 +103,16 @@
    do a = 0, ntiles_nnuc - 1
     do aa = 1, tile_size
       idxa = a*tile_size + aa
+
       cn = cord_vect_full(n, idxa)
+      if (cn == 0.d0) cycle
+
       accu = 0.d0
       do j = 0, ntiles_nelec - 1
         do jj = 1, tile_size
           idxj = j*tile_size + jj
           accu = accu + rescale_een_n_tiled(jj,aa,m,j,a) * tmp_c_tiled(jj,aa,m+l,j,a,k)
+                 tmp_c_tiled(ii,jj,aa,j,a,k) = tmp_c_tiled(ii,jj,aa,j,a,k) + &
         enddo
       enddo
       factor_een_blas = factor_een_blas + accu * cn
@@ -118,13 +122,13 @@
         do jj = 1, tile_size
           idxj = j*tile_size + jj
           factor_een_deriv_e_blas(idxj,ii) = factor_een_deriv_e_blas(idxj,ii) + (&
-            tmp_c_tiled(jj,aa,m,j,a,k) * rescale_een_n_deriv_e(idxj,ii,a,m+l) +     &
+            tmp_c_tiled(jj,aa,m,j,a,k) * rescale_een_n_deriv_e(idxj,ii,idxa,m+l) +     &
             dtmp_c_tiled(jj,ii,aa,m,j,a,k)   * rescale_een_n_tiled(jj,aa,m+l,j,a) +            &
             dtmp_c_tiled(jj,ii,aa,m+l,j,a,k) * rescale_een_n_tiled(jj,aa,m  ,j,a) +            &
-            tmp_c_tiled(jj,aa,m+l,j,a,k)*rescale_een_n_deriv_e(idxj,ii,a,m)         &
+            tmp_c_tiled(jj,aa,m+l,j,a,k)*rescale_een_n_deriv_e(idxj,ii,idxa,m)         &
             ) * cn
         enddo
-      enddo
+        enddo
       enddo
 
       cn = cn+cn
@@ -132,12 +136,12 @@
         do jj = 1, tile_size
           idxj = j*tile_size + jj
         factor_een_deriv_e_blas(idxj,4) = factor_een_deriv_e_blas(idxj,4) + (&
-            dtmp_c_tiled(jj,1,aa,m  ,j,a,k) * rescale_een_n_deriv_e(idxj,1,a,m+l) +  &
-            dtmp_c_tiled(jj,2,aa,m  ,j,a,k) * rescale_een_n_deriv_e(idxj,2,a,m+l) +  &
-            dtmp_c_tiled(jj,3,aa,m  ,j,a,k) * rescale_een_n_deriv_e(idxj,3,a,m+l) +  &
-            dtmp_c_tiled(jj,1,aa,m+l,j,a,k) * rescale_een_n_deriv_e(idxj,1,a,m  ) +  &
-            dtmp_c_tiled(jj,2,aa,m+l,j,a,k) * rescale_een_n_deriv_e(idxj,2,a,m  ) +  &
-            dtmp_c_tiled(jj,3,aa,m+l,j,a,k) * rescale_een_n_deriv_e(idxj,3,a,m  )    &
+            dtmp_c_tiled(jj,1,aa,m  ,j,a,k) * rescale_een_n_deriv_e(idxj,1,idxa,m+l) +  &
+            dtmp_c_tiled(jj,2,aa,m  ,j,a,k) * rescale_een_n_deriv_e(idxj,2,idxa,m+l) +  &
+            dtmp_c_tiled(jj,3,aa,m  ,j,a,k) * rescale_een_n_deriv_e(idxj,3,idxa,m+l) +  &
+            dtmp_c_tiled(jj,1,aa,m+l,j,a,k) * rescale_een_n_deriv_e(idxj,1,idxa,m  ) +  &
+            dtmp_c_tiled(jj,2,aa,m+l,j,a,k) * rescale_een_n_deriv_e(idxj,2,idxa,m  ) +  &
+            dtmp_c_tiled(jj,3,aa,m+l,j,a,k) * rescale_een_n_deriv_e(idxj,3,idxa,m  )    &
             )*cn
         enddo
       enddo

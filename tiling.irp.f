@@ -86,16 +86,16 @@ END_PROVIDER
    do j = 0, ntiles_nelec - 1
      do i = 0, ntiles_nelec - 1
        do a = 0, ntiles_nnuc - 1
-        do aa = 0, ncord
+        do m = 0, ncord
               !DIR$ vector aligned
           do ii = 1, 16
               !DIR$ vector aligned
            do jj = 1, 16
               !DIR$ vector aligned
              do kk = 1, 16
-                 tmp_c_tiled(ii,jj,aa,j,a,k) = tmp_c_tiled(ii,jj,aa,j,a,k) + &
+                 tmp_c_tiled(ii,jj,m,j,a,k) = tmp_c_tiled(ii,jj,m,j,a,k) + &
                                           rescale_een_e_tiled(ii,kk,j,i,k)*&
-                                          rescale_een_n_tiled(kk,jj,aa,i,a)
+                                          rescale_een_n_tiled(kk,jj,m,i,a)
             enddo
            enddo
          enddo
@@ -122,7 +122,7 @@ END_PROVIDER
    do i = 0, ntiles_nelec - 1
      do a = 0, ntiles_nnuc - 1
        do j = 0, ntiles_nelec - 1
-        do aa = 0, ncord
+        do m = 0, ncord
               !DIR$ vector aligned
           do ll = 1, 4
               !DIR$ vector aligned
@@ -131,9 +131,9 @@ END_PROVIDER
             do jj = 1, 16
               !DIR$ vector aligned
              do kk = 1, 16
-                 dtmp_c_tiled(ii,jj,ll,aa,j,a,k) =       dtmp_c_tiled(ii,jj,ll,aa,j,a,k) + &
+                 dtmp_c_tiled(ii,jj,ll,m,j,a,k) =       dtmp_c_tiled(ii,jj,ll,m,j,a,k) + &
                                           rescale_een_e_deriv_e_tiled(ii,kk,ll,j,i,k)*&
-                                                  rescale_een_n_tiled(kk,jj,aa,i,a)
+                                                  rescale_een_n_tiled(kk,jj,m,i,a)
    !call dgemm('N','N', 4*tile_size, tile_size*(ncord+1), tile_size, 1.d0,         &
    !    rescale_een_e_deriv_e_tiled(1,1,1,k,j,i), 4*size(rescale_een_e_deriv_e_tiled,1),&
    !    rescale_een_n_tiled(1,1,0,i,a), size(rescale_een_n_tiled,1), 1.d0,            &
