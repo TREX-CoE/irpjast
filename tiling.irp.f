@@ -3,7 +3,7 @@ implicit none
 BEGIN_DOC
 ! Tile size for tiling tables
 END_DOC
-tile_size = 16
+tile_size = 32
 END_PROVIDER
 
  BEGIN_PROVIDER [double precision, rescale_een_e_tiled, (tile_size, tile_size, 0:ntiles_nelec, 0:ntiles_nelec, 0:ncord)]
@@ -100,11 +100,11 @@ END_PROVIDER
    !                                size(tmp_c_tiled,1))
         !do m = 0, ncord
         !      !DIR$ vector aligned
-        !  do jj = 1, 16
+        !  do jj = 1, tile_size
         !      !DIR$ vector aligned
-        !    do ii = 1, 16
+        !    do ii = 1, tile_size
         !      !DIR$ vector aligned
-        !     do kk = 1, 16
+        !     do kk = 1, tile_size
         !         tmp_c_tiled(ii,jj,m,j,a,k) = tmp_c_tiled(ii,jj,m,j,a,k) + &
         !                                  rescale_een_e_tiled(ii,kk,j,i,k)*&
         !                                  rescale_een_n_tiled(kk,jj,m,i,a)
@@ -139,11 +139,11 @@ END_PROVIDER
         !      !DIR$ vector aligned
         !  do ll = 1, 4
         !      !DIR$ vector aligned
-        !   do jj = 1, 16
+        !   do jj = 1, tile_size
         !      !DIR$ vector aligned
-        !    do ii = 1, 16
+        !    do ii = 1, tile_size
         !      !DIR$ vector aligned
-        !     do kk = 1, 16
+        !     do kk = 1, tile_size
         !         dtmp_c_tiled(ii,jj,ll,m,j,a,k) =       dtmp_c_tiled(ii,jj,ll,m,j,a,k) +   &
         !                                 rescale_een_e_deriv_e_tiled(ii,kk,ll,j,i,k)   *   &
         !                                         rescale_een_n_tiled(kk,jj,m,i,a)

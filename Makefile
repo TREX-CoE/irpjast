@@ -21,7 +21,7 @@ MAGMA_F90FLAGS := -I$(MAGMADIR)/include -Dmagma_devptr_t="integer(kind=8)"
 MAGMA_LIBS   := #-L$(MAGMADIR)/lib -L$(CUDADIR)/lib64 -L$(OPENBLASDIR)/lib \
                 -lmagma -lcublas -lcudart -lmkl
 
-IRPF90 = irpf90 --codelet=elec_dist:2 -s tile_size:16 
+IRPF90 = irpf90 --codelet=elec_dist:2 -s tile_size:32
 -include irpf90.make
 export
 
