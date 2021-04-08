@@ -3,7 +3,7 @@ program codelet_elec_dist
   implicit none
   integer :: i
   double precision :: ticks_0, ticks_1, cpu_0, cpu_1
-  integer, parameter :: irp_imax = 1000
+  integer, parameter :: irp_imax = 2
 
   
 

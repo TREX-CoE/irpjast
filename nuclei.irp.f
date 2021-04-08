@@ -36,7 +36,7 @@ BEGIN_PROVIDER [ double precision, nuc_coord, (nnuc, 3) ]
  BEGIN_DOC
  ! Nuclei coordinates
  END_DOC
- character(len=*), parameter :: FILE_NAME = "geometry.txt"
+ character(len=*), parameter :: FILE_NAME = "/home/vijay/Documents/codes/TREX/irpjast/geometry.txt"
  integer :: fu, rc, i
  
  open(action='read', file=FILE_NAME, iostat=rc, newunit=fu)

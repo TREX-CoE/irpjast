@@ -1,4 +1,4 @@
-FC     = ifort -O3 -ip -g  -march=core-avx2 -align array64byte -fma -ftz -fomit-frame-pointer #-O3 -march=native -mkl=sequential -g -I$(PWD) #-xHost -check all 
+FC     = ifort -O3 -ip -g  -march=core-avx2 -align array64byte -fma -ftz -fomit-frame-pointer -mkl=sequential #-O3 -march=native -mkl=sequential -g -I$(PWD) #-xHost -check all 
 CPP    = g++ -O2 -march=native # -Wall
 FCFLAGS= #-O2 -ffree-line-length-none -I .
 NINJA  = ninja
@@ -18,10 +18,10 @@ OPENBLASDIR  ?= /p/software/juwelsbooster/stages/2020/software/GCC/
 MAGMA_CFLAGS   := -DADD_ -I$(MAGMADIR)/include -I$(CUDADIR)/include
 MAGMA_F90FLAGS := -I$(MAGMADIR)/include -Dmagma_devptr_t="integer(kind=8)"
 
-MAGMA_LIBS   := -lblas #-L$(MAGMADIR)/lib -L$(CUDADIR)/lib64 -L$(OPENBLASDIR)/lib \
+MAGMA_LIBS   := #-L$(MAGMADIR)/lib -L$(CUDADIR)/lib64 -L$(OPENBLASDIR)/lib \
                 -lmagma -lcublas -lcudart -lmkl
 
-IRPF90 = irpf90 --codelet=elec_dist:1000 -s tile_size:16 
+IRPF90 = irpf90 --codelet=elec_dist:2 -s tile_size:16 
 -include irpf90.make
 export
 

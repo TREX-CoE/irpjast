@@ -39,7 +39,7 @@ BEGIN_PROVIDER [ double precision, elec_coord, (nelec_16, 3) ]
  BEGIN_DOC
  ! Electron coordinates
  END_DOC
- character(len=*), parameter :: FILE_NAME = "elec_coord.txt"
+ character(len=*), parameter :: FILE_NAME = "/home/vijay/Documents/codes/TREX/irpjast/elec_coord.txt"
  integer :: fu, rc, i, j
 
  open(action='read', file=FILE_NAME, iostat=rc, newunit=fu)

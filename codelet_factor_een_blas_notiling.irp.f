@@ -6,18 +6,23 @@ program codelet_factor_een_blas
   integer*8 :: irp_imax 
 
 
-  PROVIDE factor_een_blas tmp_c_tiled
+  !PROVIDE factor_een_blas tmp_c_tiled
+  PROVIDE factor_een_blas tmp_c
 
   call provide_factor_een_blas
 
   double precision :: irp_rdtsc
 
   irp_imax = max(1_8,20_8 * 125000000_8 /(int(nelec,8) * int(nelec,8) * int(nnuc,8) * ncord))
+  irp_imax = 1
+  print *,"irp_imax=",irp_imax
 
   call cpu_time(cpu_0)
   ticks_0 = irp_rdtsc()
   do i=1,irp_imax
-    call bld_tmp_c_tiled
+  print *,i
+    !call bld_tmp_c_tiled
+    call bld_tmp_c
     call bld_factor_een_blas
   enddo
   ticks_1 = irp_rdtsc()
