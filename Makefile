@@ -18,7 +18,7 @@ OPENBLASDIR  ?= /p/software/juwelsbooster/stages/2020/software/GCC/
 MAGMA_CFLAGS   := -DADD_ -I$(MAGMADIR)/include -I$(CUDADIR)/include
 MAGMA_F90FLAGS := -I$(MAGMADIR)/include -Dmagma_devptr_t="integer(kind=8)"
 
-MAGMA_LIBS   := #-L$(MAGMADIR)/lib -L$(CUDADIR)/lib64 -L$(OPENBLASDIR)/lib \
+MAGMA_LIBS   := -lblas #-L$(MAGMADIR)/lib -L$(CUDADIR)/lib64 -L$(OPENBLASDIR)/lib \
                 -lmagma -lcublas -lcudart -lmkl
 
 IRPF90 = irpf90 --codelet=elec_dist:1000 -s tile_size:16 

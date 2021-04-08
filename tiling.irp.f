@@ -131,9 +131,9 @@ END_PROVIDER
             do jj = 1, 16
               !DIR$ vector aligned
              do kk = 1, 16
-                 dtmp_c_tiled(ii,jj,ll,m,j,a,k) =       dtmp_c_tiled(ii,jj,ll,m,j,a,k) + &
-                                          rescale_een_e_deriv_e_tiled(ii,kk,ll,j,i,k)*&
-                                                  rescale_een_n_tiled(kk,jj,m,i,a)
+                 dtmp_c_tiled(ii,ll,jj,m,j,a,k) =       dtmp_c_tiled(ii,ll,jj,m,j,a,k) +   &
+                                         rescale_een_e_deriv_e_tiled(ii,ll,kk,j,i,k)   *   &
+                                                 rescale_een_n_tiled(kk,jj,m,i,a)
    !call dgemm('N','N', 4*tile_size, tile_size*(ncord+1), tile_size, 1.d0,         &
    !    rescale_een_e_deriv_e_tiled(1,1,1,k,j,i), 4*size(rescale_een_e_deriv_e_tiled,1),&
    !    rescale_een_n_tiled(1,1,0,i,a), size(rescale_een_n_tiled,1), 1.d0,            &
