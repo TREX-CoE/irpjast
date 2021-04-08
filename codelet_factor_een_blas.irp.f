@@ -6,7 +6,7 @@ program codelet_factor_een_blas
   integer*8 :: irp_imax 
 
 
-  PROVIDE factor_een_blas tmp_c 
+  PROVIDE factor_een_blas tmp_c_tiled
 
   call provide_factor_een_blas
 
@@ -17,7 +17,7 @@ program codelet_factor_een_blas
   call cpu_time(cpu_0)
   ticks_0 = irp_rdtsc()
   do i=1,irp_imax
-    call bld_tmp_c
+    call bld_tmp_c_tiled
     call bld_factor_een_blas
   enddo
   ticks_1 = irp_rdtsc()

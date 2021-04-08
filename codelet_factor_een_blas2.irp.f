@@ -6,7 +6,7 @@ program codelet_factor_een_blas
   integer*8 :: irp_imax 
 
 
-  PROVIDE factor_een_blas tmp_c 
+  PROVIDE factor_een_blas tmp_c_tiled
 
   call provide_factor_een_blas
 
