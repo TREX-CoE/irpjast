@@ -7,7 +7,7 @@ program jastrow
   print *, 'X'
   print *, factor_een_deriv_e
   print *, 'BLAS'
-  print *, factor_een_deriv_e_blas
+  print *, factor_een_deriv_e_blas_tiled
   !PROVIDE jastrow_full
 
 end program
