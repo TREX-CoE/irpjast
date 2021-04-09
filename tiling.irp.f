@@ -135,13 +135,19 @@ END_PROVIDER
         do m = 0, ncord
               !DIR$ vector aligned
           do jj = 1, tile_size
+            !DIR$ vector aligned
+            do kk = 1, tile_size, 4
               !DIR$ vector aligned
-            do ii = 1, tile_size
-              !DIR$ vector aligned
-             do kk = 1, tile_size
+              do ii = 1, tile_size
                  tmp_c_tiled(ii,jj,m,j,a,k) = tmp_c_tiled(ii,jj,m,j,a,k) + &
-                                          rescale_een_e_tiled_T(kk,ii,j,i,k)*&
-                                          rescale_een_n_tiled(kk,jj,m,i,a)
+                                          rescale_een_e_tiled(ii,kk+0,j,i,k)*&
+                                          rescale_een_n_tiled(kk+0,jj,m,i,a)+&
+                                          rescale_een_e_tiled(ii,kk+1,j,i,k)*&
+                                          rescale_een_n_tiled(kk+1,jj,m,i,a)+&
+                                          rescale_een_e_tiled(ii,kk+2,j,i,k)*&
+                                          rescale_een_n_tiled(kk+2,jj,m,i,a)+&
+                                          rescale_een_e_tiled(ii,kk+3,j,i,k)*&
+                                          rescale_een_n_tiled(kk+3,jj,m,i,a)
             enddo
            enddo
          enddo
@@ -174,13 +180,19 @@ END_PROVIDER
           do ll = 1, 4
               !DIR$ vector aligned
            do jj = 1, tile_size
-              !DIR$ vector aligned
-            do ii = 1, tile_size
-              !DIR$ vector aligned
-             do kk = 1, tile_size
+             !DIR$ vector aligned
+             do kk = 1, tile_size, 4
+               !DIR$ vector aligned
+               do ii = 1, tile_size
                  dtmp_c_tiled(ii,jj,ll,m,j,a,k) =       dtmp_c_tiled(ii,jj,ll,m,j,a,k) +   &
-                                         rescale_een_e_deriv_e_tiled_T(kk,ii,ll,j,i,k)   *   &
-                                                 rescale_een_n_tiled(kk,jj,m,i,a)
+                                       rescale_een_e_deriv_e_tiled(ii,kk+0,ll,j,i,k)   *   &
+                                                 rescale_een_n_tiled(kk+0,jj,m,i,a)    +   &
+                                       rescale_een_e_deriv_e_tiled(ii,kk+1,ll,j,i,k)   *   &
+                                                 rescale_een_n_tiled(kk+1,jj,m,i,a)    +   &
+                                       rescale_een_e_deriv_e_tiled(ii,kk+2,ll,j,i,k)   *   &
+                                                 rescale_een_n_tiled(kk+2,jj,m,i,a)    +   &
+                                       rescale_een_e_deriv_e_tiled(ii,kk+3,ll,j,i,k)   *   &
+                                                 rescale_een_n_tiled(kk+3,jj,m,i,a)
              enddo
             enddo
            enddo
