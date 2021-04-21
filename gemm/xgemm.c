@@ -30,7 +30,7 @@
 #include <cublas.h>
 #endif
 
-static unsigned niter = 10;
+static unsigned niter = 1;
 static unsigned nslicesx = 4;
 static unsigned nslicesy = 4;
 static unsigned xdim = 1024;
@@ -69,7 +69,7 @@ static void check_output(void)
 }
 #endif
 
-static void init_problem_data(void)
+static void init_problem_data(TYPE *A_inp, TYPE *B_inp, TYPE *C_inp)
 {
 #ifndef STARPU_SIMGRID
 	unsigned i,j;
@@ -83,7 +83,7 @@ static void init_problem_data(void)
 	{
 		for (i=0; i < zdim; i++)
 		{
-			A[j+i*ydim] = (TYPE)(starpu_drand48());
+			A[j+i*ydim] = A_inp[j+i*ydim];
 		}
 	}
 
@@ -91,7 +91,7 @@ static void init_problem_data(void)
 	{
 		for (i=0; i < xdim; i++)
 		{
-			B[j+i*zdim] = (TYPE)(starpu_drand48());
+			B[j+i*zdim] = B_inp[j+i*zdim];
 		}
 	}
 
@@ -99,7 +99,7 @@ static void init_problem_data(void)
 	{
 		for (i=0; i < xdim; i++)
 		{
-			C[j+i*ydim] = (TYPE)(0);
+			C[j+i*ydim] = C_inp[j+i*ydim];
 		}
 	}
 #endif
@@ -305,7 +305,18 @@ static void parse_args(int argc, char **argv)
 	}
 }
 
-int main_x(int argc, char **argv)
+int run_init_starpu_c(){
+
+	int ret = starpu_init(NULL);
+	if (ret == -ENODEV)
+		return 77;
+	STARPU_CHECK_RETURN_VALUE(ret, "starpu_init");
+
+	starpu_cublas_init();
+};
+
+int run_starpu_dgemm_hybrid_c(TYPE *A_inp, TYPE *B_inp, TYPE *C_inp, unsigned int ydim_inp, 
+    unsigned int xdim_inp, unsigned int zdim_inp, unsigned int nslicesx_inp, unsigned int nslicesy_inp)
 {
 	double start, end;
 	int ret;
@@ -313,20 +324,18 @@ int main_x(int argc, char **argv)
   // Nsteps - Number of DGEMM tasks
   //nsteps = 40;
 
-	parse_args(argc, argv);
+	//parse_args(argc, argv);
+  nslicesx = nslicesx_inp;
+  nslicesy = nslicesy_inp;
+  xdim = xdim_inp;
+  ydim = ydim_inp;
+  zdim = zdim_inp;
 
 #ifdef STARPU_QUICK_CHECK
 	niter /= 10;
 #endif
 
-	ret = starpu_init(NULL);
-	if (ret == -ENODEV)
-		return 77;
-	STARPU_CHECK_RETURN_VALUE(ret, "starpu_init");
-
-	starpu_cublas_init();
-
-	init_problem_data();
+	init_problem_data(A_inp, B_inp, C_inp);
 	partition_mult_data();
 
 	start = starpu_timing_now();
@@ -387,8 +396,11 @@ enodev:
 	starpu_free(B);
 	starpu_free(C);
 
+	return ret;
+};
+
+int run_stop_starpu_c()
+{
 	starpu_cublas_shutdown();
 	starpu_shutdown();
-
-	return ret;
-}
+};

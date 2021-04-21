@@ -9,8 +9,8 @@ END_PROVIDER
  BEGIN_PROVIDER [double precision, rescale_een_e_tiled, (tile_size, tile_size, 0:ntiles_nelec, 0:ntiles_nelec, 0:ncord)]
 &BEGIN_PROVIDER [double precision, rescale_een_e_tiled_T, (tile_size, tile_size, 0:ntiles_nelec, 0:ntiles_nelec, 0:ncord)]
 &BEGIN_PROVIDER [double precision, rescale_een_n_tiled, (tile_size, tile_size, 0:ncord, 0:ntiles_nelec, 0:ntiles_nnuc)]
-&BEGIN_PROVIDER [double precision, rescale_een_e_deriv_e_tiled, (tile_size, tile_size, 4, 0:ntiles_nelec, 0:ntiles_nelec, 0:ncord )]
-&BEGIN_PROVIDER [double precision, rescale_een_e_deriv_e_tiled_T, (tile_size, tile_size, 4, 0:ntiles_nelec, 0:ntiles_nelec, 0:ncord )]
+&BEGIN_PROVIDER [double precision, rescale_een_e_deriv_e_tiled, (tile_size, 4, tile_size, 0:ntiles_nelec, 0:ntiles_nelec, 0:ncord )]
+&BEGIN_PROVIDER [double precision, rescale_een_e_deriv_e_tiled_T, (tile_size, 4, tile_size, 0:ntiles_nelec, 0:ntiles_nelec, 0:ncord )]
  implicit none
  BEGIN_DOC
  ! R = exp(-kappa r) for electron-electron for $J_{een}$
@@ -72,7 +72,7 @@ END_PROVIDER
        do ii = 1, tile_size
           idxi = i*tile_size + ii
           do k = 1, 4
-             rescale_een_e_deriv_e_tiled(ii,jj,k,i,j,l) = rescale_een_e_deriv_e(idxi, k, idxj, l) 
+             rescale_een_e_deriv_e_tiled(ii,k,jj,i,j,l) = rescale_een_e_deriv_e(idxi, k, idxj, l) 
           enddo
        enddo
        enddo
@@ -89,7 +89,7 @@ enddo
        do ii = 1, tile_size
           idxi = i*tile_size + ii
           do k = 1, 4
-             rescale_een_e_deriv_e_tiled_T(jj,ii,k,i,j,l) = rescale_een_e_deriv_e(idxi, k, idxj, l) 
+             rescale_een_e_deriv_e_tiled_T(jj,k,ii,i,j,l) = rescale_een_e_deriv_e(idxi, k, idxj, l) 
           enddo
        enddo
        enddo
@@ -100,8 +100,10 @@ enddo
 END_PROVIDER
 
  BEGIN_PROVIDER [ double precision,  tmp_c_tiled, (tile_size, tile_size,0:ncord, 0:ntiles_nelec, 0:ntiles_nnuc,0:ncord-1) ]
-&BEGIN_PROVIDER [ double precision, dtmp_c_tiled, (tile_size, tile_size,4,0:ncord, 0:ntiles_nelec, 0:ntiles_nnuc,0:ncord-1) ]
- !use tiling_interface
+&BEGIN_PROVIDER [ double precision, dtmp_c_tiled, (tile_size, 4, tile_size,0:ncord, 0:ntiles_nelec, 0:ntiles_nnuc,0:ncord-1) ]
+&BEGIN_PROVIDER [ double precision,  tmp_c1, (nelec_16,nnuc_16,0:ncord,0:ncord-1) ]
+&BEGIN_PROVIDER [ double precision, dtmp_c1, (nelec_16,4,nnuc_16,0:ncord,0:ncord-1) ]
+ use tiling_interface
  implicit none
  BEGIN_DOC
  ! Calculate the intermediate buffers
@@ -115,53 +117,72 @@ END_PROVIDER
  integer :: ii, jj, aa, kk, ll
  integer :: res
 
+ call run_init_starpu_c()
+
  ! r_{ij}^k . R_{ja}^l -> tmp_c_{ia}^{kl}
  do k=0,ncord-1
-   do j = 0, ntiles_nelec - 1
-     do i = 0, ntiles_nelec - 1
-       do a = 0, ntiles_nnuc - 1
+
+   !call run_magma_dgemm_async_gpu_c(rescale_een_e(1,1,k),       &
+   !                                rescale_een_n(1,1,0), &
+   !                                tmp_c1(1,1,0,k),       &
+   !                                nelec_16, nnuc_16*(ncord+1), &
+   !                                nelec_16,                      &
+   !                                size(rescale_een_e,1),    &
+   !                                size(rescale_een_n,1),    &
+   !                                size(tmp_c1,1))
+
+   call run_starpu_dgemm_hybrid_c(rescale_een_e(1,1,k),          &
+                                  rescale_een_n(1,1,0),          &
+                                  tmp_c1(1,1,0,k),               &
+                                  nelec_16, nnuc_16*(ncord+1),   &
+                                  nelec_16,                      &
+                                  4,4)
+
+   !do i = 0, ntiles_nelec - 1
+   !  do j = 0, ntiles_nelec - 1
+   !    do a = 0, ntiles_nnuc - 1
    !call dgemm('N','N', tile_size, tile_size*(ncord+1), tile_size, 1.d0,           &
    !    rescale_een_e_tiled(1,1,j,i,k), size(rescale_een_e_tiled,1),                  &
    !    rescale_een_n_tiled(1,1,0,i,a), size(rescale_een_n_tiled,1), 1.d0,            &
    !    tmp_c_tiled(1,1,0,j,a,k), size(tmp_c_tiled,1))
-   !call run_magma_dgemm_async_gpu_c(rescale_een_e_tiled(1,1,j,i,k),       &
-   !                                rescale_een_n_tiled(1,1,0,i,a), &
-   !                                tmp_c_tiled(1,1,0,j,a,k),       &
-   !                                tile_size, tile_size*(ncord+1), &
-   !                                tile_size,                      &
-   !                                size(rescale_een_e_tiled,1),    &
-   !                                size(rescale_een_n_tiled,1),    &
-   !                                size(tmp_c_tiled,1))
-        do m = 0, ncord
-              !DIR$ vector aligned
-          do jj = 1, tile_size
-            !DIR$ vector aligned
-            do kk = 1, tile_size, 4
-              !DIR$ vector aligned
-              do ii = 1, tile_size
-                 tmp_c_tiled(ii,jj,m,j,a,k) = tmp_c_tiled(ii,jj,m,j,a,k) + &
-                                          rescale_een_e_tiled(ii,kk+0,j,i,k)*&
-                                          rescale_een_n_tiled(kk+0,jj,m,i,a)+&
-                                          rescale_een_e_tiled(ii,kk+1,j,i,k)*&
-                                          rescale_een_n_tiled(kk+1,jj,m,i,a)+&
-                                          rescale_een_e_tiled(ii,kk+2,j,i,k)*&
-                                          rescale_een_n_tiled(kk+2,jj,m,i,a)+&
-                                          rescale_een_e_tiled(ii,kk+3,j,i,k)*&
-                                          rescale_een_n_tiled(kk+3,jj,m,i,a)
-            enddo
-           enddo
-         enddo
-        enddo
-       enddo
-     enddo
-   enddo
+        !do m = 0, ncord
+        !      !DIR$ vector aligned
+        !  do jj = 1, tile_size
+        !    !DIR$ vector aligned
+        !    do kk = 1, tile_size, 4
+        !      !DIR$ vector aligned
+        !      do ii = 1, tile_size
+        !         tmp_c_tiled(ii,jj,m,j,a,k) = tmp_c_tiled(ii,jj,m,j,a,k) + &
+        !                                  rescale_een_e_tiled(ii,kk+0,j,i,k)*&
+        !                                  rescale_een_n_tiled(kk+0,jj,m,i,a)+&
+        !                                  rescale_een_e_tiled(ii,kk+1,j,i,k)*&
+        !                                  rescale_een_n_tiled(kk+1,jj,m,i,a)+&
+        !                                  rescale_een_e_tiled(ii,kk+2,j,i,k)*&
+        !                                  rescale_een_n_tiled(kk+2,jj,m,i,a)+&
+        !                                  rescale_een_e_tiled(ii,kk+3,j,i,k)*&
+        !                                  rescale_een_n_tiled(kk+3,jj,m,i,a)
+        !    enddo
+        !   enddo
+        ! enddo
+        !enddo
+   !    enddo
+   !  enddo
+   !enddo
  enddo
 
  ! dr_{ij}^k . R_{ja}^l -> dtmp_c_{ia}^{kl}
  do k=0,ncord-1
-   do i = 0, ntiles_nelec - 1
-     do a = 0, ntiles_nnuc - 1
-       do j = 0, ntiles_nelec - 1
+   call run_magma_dgemm_async_gpu_c(rescale_een_e_deriv_e(1,1,1,k), &
+                                   rescale_een_n(1,1,0),            &
+                                   dtmp_c1(1,1,1,0,k),               &
+                                   4*nelec_16, nnuc_16*(ncord+1),          &
+                                   nelec,                                 &
+                                   4*size(rescale_een_e_deriv_e,1),     &
+                                   size(rescale_een_n,1),               &
+                                   4*size(dtmp_c1,1))
+   !do i = 0, ntiles_nelec - 1
+   !  do j = 0, ntiles_nelec - 1
+   !    do a = 0, ntiles_nnuc - 1
    !call dgemm('N','N', 4*tile_size, tile_size*(ncord+1), tile_size, 1.d0,         &
    !    rescale_een_e_deriv_e_tiled(1,1,1,j,i,k), 4*size(rescale_een_e_deriv_e_tiled,1),&
    !    rescale_een_n_tiled(1,1,0,i,a), size(rescale_een_n_tiled,1), 1.d0,            &
@@ -175,34 +196,35 @@ END_PROVIDER
    !                                4*size(rescale_een_e_deriv_e_tiled,1),     &
    !                                size(rescale_een_n_tiled,1),               &
    !                                4*size(dtmp_c_tiled,1))
-        do m = 0, ncord
-              !DIR$ vector aligned
-          do ll = 1, 4
-              !DIR$ vector aligned
-           do jj = 1, tile_size
-             !DIR$ vector aligned
-             do kk = 1, tile_size, 4
-               !DIR$ vector aligned
-               do ii = 1, tile_size
-                 dtmp_c_tiled(ii,jj,ll,m,j,a,k) =       dtmp_c_tiled(ii,jj,ll,m,j,a,k) +   &
-                                       rescale_een_e_deriv_e_tiled(ii,kk+0,ll,j,i,k)   *   &
-                                                 rescale_een_n_tiled(kk+0,jj,m,i,a)    +   &
-                                       rescale_een_e_deriv_e_tiled(ii,kk+1,ll,j,i,k)   *   &
-                                                 rescale_een_n_tiled(kk+1,jj,m,i,a)    +   &
-                                       rescale_een_e_deriv_e_tiled(ii,kk+2,ll,j,i,k)   *   &
-                                                 rescale_een_n_tiled(kk+2,jj,m,i,a)    +   &
-                                       rescale_een_e_deriv_e_tiled(ii,kk+3,ll,j,i,k)   *   &
-                                                 rescale_een_n_tiled(kk+3,jj,m,i,a)
-             enddo
-            enddo
-           enddo
-         enddo
-        enddo
-       enddo
-     enddo
-   enddo
+        !do m = 0, ncord
+        !      !DIR$ vector aligned
+        !  do ll = 1, 4
+        !      !DIR$ vector aligned
+        !   do jj = 1, tile_size
+        !     !DIR$ vector aligned
+        !     do kk = 1, tile_size, 4
+        !       !DIR$ vector aligned
+        !       do ii = 1, tile_size
+        !         dtmp_c_tiled(ii,jj,ll,m,j,a,k) =       dtmp_c_tiled(ii,jj,ll,m,j,a,k) +   &
+        !                               rescale_een_e_deriv_e_tiled(ii,kk+0,ll,j,i,k)   *   &
+        !                                         rescale_een_n_tiled(kk+0,jj,m,i,a)    +   &
+        !                               rescale_een_e_deriv_e_tiled(ii,kk+1,ll,j,i,k)   *   &
+        !                                         rescale_een_n_tiled(kk+1,jj,m,i,a)    +   &
+        !                               rescale_een_e_deriv_e_tiled(ii,kk+2,ll,j,i,k)   *   &
+        !                                         rescale_een_n_tiled(kk+2,jj,m,i,a)    +   &
+        !                               rescale_een_e_deriv_e_tiled(ii,kk+3,ll,j,i,k)   *   &
+        !                                         rescale_een_n_tiled(kk+3,jj,m,i,a)
+        !     enddo
+        !    enddo
+        !   enddo
+        ! enddo
+        !enddo
+   !    enddo
+   !  enddo
+   !enddo
  enddo
 
+ call run_stop_starpu_c()
 
 END_PROVIDER
 

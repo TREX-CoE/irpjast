@@ -57,12 +57,12 @@
         do jj = 1, tile_size
           idxj = j*tile_size + jj
         factor_een_deriv_e_blas_tiled(idxj,4) = factor_een_deriv_e_blas_tiled(idxj,4) + (&
-            dtmp_c_tiled(jj,aa,1,m  ,j,a,k) * rescale_een_n_deriv_e(idxj,1,idxa,m+l) +  &
-            dtmp_c_tiled(jj,aa,2,m  ,j,a,k) * rescale_een_n_deriv_e(idxj,2,idxa,m+l) +  &
-            dtmp_c_tiled(jj,aa,3,m  ,j,a,k) * rescale_een_n_deriv_e(idxj,3,idxa,m+l) +  &
-            dtmp_c_tiled(jj,aa,1,m+l,j,a,k) * rescale_een_n_deriv_e(idxj,1,idxa,m  ) +  &
-            dtmp_c_tiled(jj,aa,2,m+l,j,a,k) * rescale_een_n_deriv_e(idxj,2,idxa,m  ) +  &
-            dtmp_c_tiled(jj,aa,3,m+l,j,a,k) * rescale_een_n_deriv_e(idxj,3,idxa,m  )    &
+            dtmp_c_tiled(jj,1,aa,m  ,j,a,k) * rescale_een_n_deriv_e(idxj,1,idxa,m+l) +  &
+            dtmp_c_tiled(jj,2,aa,m  ,j,a,k) * rescale_een_n_deriv_e(idxj,2,idxa,m+l) +  &
+            dtmp_c_tiled(jj,3,aa,m  ,j,a,k) * rescale_een_n_deriv_e(idxj,3,idxa,m+l) +  &
+            dtmp_c_tiled(jj,1,aa,m+l,j,a,k) * rescale_een_n_deriv_e(idxj,1,idxa,m  ) +  &
+            dtmp_c_tiled(jj,2,aa,m+l,j,a,k) * rescale_een_n_deriv_e(idxj,2,idxa,m  ) +  &
+            dtmp_c_tiled(jj,3,aa,m+l,j,a,k) * rescale_een_n_deriv_e(idxj,3,idxa,m  )    &
             )*cn
         enddo
       enddo
