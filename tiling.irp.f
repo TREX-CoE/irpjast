@@ -136,7 +136,7 @@ END_PROVIDER
                                   tmp_c1(1,1,0,k),               &
                                   nelec_16, nnuc_16*(ncord+1),   &
                                   nelec_16,                      &
-                                  4,4)
+                                  8,8)
 
    !do i = 0, ntiles_nelec - 1
    !  do j = 0, ntiles_nelec - 1
@@ -172,14 +172,21 @@ END_PROVIDER
 
  ! dr_{ij}^k . R_{ja}^l -> dtmp_c_{ia}^{kl}
  do k=0,ncord-1
-   call run_magma_dgemm_async_gpu_c(rescale_een_e_deriv_e(1,1,1,k), &
-                                   rescale_een_n(1,1,0),            &
-                                   dtmp_c1(1,1,1,0,k),               &
-                                   4*nelec_16, nnuc_16*(ncord+1),          &
-                                   nelec,                                 &
-                                   4*size(rescale_een_e_deriv_e,1),     &
-                                   size(rescale_een_n,1),               &
-                                   4*size(dtmp_c1,1))
+   !call run_magma_dgemm_async_gpu_c(rescale_een_e_deriv_e(1,1,1,k), &
+   !                                rescale_een_n(1,1,0),            &
+   !                                dtmp_c1(1,1,1,0,k),               &
+   !                                4*nelec_16, nnuc_16*(ncord+1),          &
+   !                                nelec,                                 &
+   !                                4*size(rescale_een_e_deriv_e,1),     &
+   !                                size(rescale_een_n,1),               &
+   !                                4*size(dtmp_c1,1))
+   call run_starpu_dgemm_hybrid_c(rescale_een_e_deriv_e(1,1,1,k),          &
+                                  rescale_een_n(1,1,0),                    &
+                                  dtmp_c1(1,1,1,0,k),                      &
+                                  4*nelec_16, nnuc_16*(ncord+1),           &
+                                  nelec_16,                                &
+                                  8,8)
+
    !do i = 0, ntiles_nelec - 1
    !  do j = 0, ntiles_nelec - 1
    !    do a = 0, ntiles_nnuc - 1
