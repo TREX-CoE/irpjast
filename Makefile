@@ -1,14 +1,14 @@
 FC     = ifort -O3 -ip -g  -march=native -align array64byte -fma -ftz -fomit-frame-pointer -mkl=parallel #-O3 -march=native -mkl=sequential -g -I$(PWD) #-xHost -check all 
 CC     = gcc
 CPP    = g++ -O2 -march=native # -Wall
-FCFLAGS= #-O2 -ffree-line-length-none -I .
+FCFLAGS= -I .#-O2 -ffree-line-length-none -I .
 NINJA  = ninja
 AR = ar
 ARCHIVE = ar crs
 RANLIB = ranlib
 
-SRC= 
-OBJ=
+SRC=  tiling_interface.f90
+OBJ=  tiling_interface.o
 LIB= $(MAGMA_F90FLAGS) $(LDFLAGS) $(MAGMA_LIBS) $(STARPU_CFLAGS) $(STARPU_LIBS) -L${GLIB} -lstdc++  magma_dgemm_async_gpu.o dgemm.o gemm/common/blas.o
 MAGMA         = /p/software/juwelsbooster/stages/2020/software/magma/2.5.4-gcccoremkl-9.3.0-2020.2.254
 MAGMADIR      = /p/software/juwelsbooster/stages/2020/software/magma/2.5.4-gcccoremkl-9.3.0-2020.2.254

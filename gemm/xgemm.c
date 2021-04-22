@@ -79,26 +79,26 @@ static void init_problem_data(TYPE *A_inp, TYPE *B_inp, TYPE *C_inp)
 	starpu_malloc((void **)&C, xdim*ydim*sizeof(TYPE));
 
 	/* fill the A and B matrices */
-	for (j=0; j < ydim; j++)
-	{
 		for (i=0; i < zdim; i++)
 		{
+	for (j=0; j < ydim; j++)
+	{
 			A[j+i*ydim] = A_inp[j+i*ydim];
 		}
 	}
 
-	for (j=0; j < zdim; j++)
-	{
 		for (i=0; i < xdim; i++)
 		{
+	for (j=0; j < zdim; j++)
+	{
 			B[j+i*zdim] = B_inp[j+i*zdim];
 		}
 	}
 
-	for (j=0; j < ydim; j++)
-	{
 		for (i=0; i < xdim; i++)
 		{
+	for (j=0; j < ydim; j++)
+	{
 			C[j+i*ydim] = C_inp[j+i*ydim];
 		}
 	}
@@ -208,7 +208,8 @@ static struct starpu_codelet cl =
 	.cuda_funcs = {(void*) 1},
 #endif
 #ifdef STARPU_USE_CUDA
-	.cuda_funcs = {cublas_mult},
+//.cuda_funcs = {cublas_mult},
+	.cuda_funcs = {(void*) NULL},
 #endif
 	.nbuffers = 3,
 	.modes = {STARPU_R, STARPU_R, STARPU_RW},
@@ -340,7 +341,7 @@ int run_starpu_dgemm_hybrid_c(TYPE *A_inp, TYPE *B_inp, TYPE *C_inp, unsigned in
 
 	start = starpu_timing_now();
 
-	unsigned x, y, ns, iter;
+	unsigned x, y, ns, iter, i, j;
 	for (iter = 0; iter < niter; iter++)
 	{
 		for (ns = 0; ns < nsteps; ++ns)
@@ -367,6 +368,14 @@ int run_starpu_dgemm_hybrid_c(TYPE *A_inp, TYPE *B_inp, TYPE *C_inp, unsigned in
 		starpu_task_wait_for_all();
 	}
 
+
+		for (i=0; i < xdim; i++)
+		{
+	for (j=0; j < ydim; j++)
+	{
+			C_inp[j+i*ydim] = C[j+i*ydim];
+		}
+	}
 
 	end = starpu_timing_now();
 

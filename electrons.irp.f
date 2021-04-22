@@ -3,8 +3,8 @@ BEGIN_PROVIDER [ integer, nelec ]
  BEGIN_DOC
  ! Number of electrons
  END_DOC
- !nelec = 10
- read(*,*)nelec
+ nelec = 2304
+ !read(*,*)nelec
 END_PROVIDER
 
  BEGIN_PROVIDER [ integer, nelec_16 ]
@@ -39,7 +39,7 @@ BEGIN_PROVIDER [ double precision, elec_coord, (nelec_16, 3) ]
  BEGIN_DOC
  ! Electron coordinates
  END_DOC
- character(len=*), parameter :: FILE_NAME = "/p/project/training2105/Quantum_Package/TREX/irpjast/elec_coord.txt"
+ character(len=*), parameter :: FILE_NAME = "elec_coord.txt"
  integer :: fu, rc, i, j
 
  open(action='read', file=FILE_NAME, iostat=rc, newunit=fu)

@@ -136,7 +136,7 @@ END_PROVIDER
                                   tmp_c1(1,1,0,k),               &
                                   nelec_16, nnuc_16*(ncord+1),   &
                                   nelec_16,                      &
-                                  8,8)
+                                  1,1)
 
    !do i = 0, ntiles_nelec - 1
    !  do j = 0, ntiles_nelec - 1
@@ -185,7 +185,7 @@ END_PROVIDER
                                   dtmp_c1(1,1,1,0,k),                      &
                                   4*nelec_16, nnuc_16*(ncord+1),           &
                                   nelec_16,                                &
-                                  8,8)
+                                  1,1)
 
    !do i = 0, ntiles_nelec - 1
    !  do j = 0, ntiles_nelec - 1

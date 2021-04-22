@@ -36,7 +36,7 @@ BEGIN_PROVIDER [ double precision, nuc_coord, (nnuc, 3) ]
  BEGIN_DOC
  ! Nuclei coordinates
  END_DOC
- character(len=*), parameter :: FILE_NAME = "/p/project/training2105/Quantum_Package/TREX/irpjast/geometry.txt"
+ character(len=*), parameter :: FILE_NAME = "geometry.txt"
  integer :: fu, rc, i
  
  open(action='read', file=FILE_NAME, iostat=rc, newunit=fu)
