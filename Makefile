@@ -7,18 +7,22 @@ NINJA  = ninja
 ARCHIVE = ar crs
 RANLIB = ranlib
 
-SRC= IRPF90_temp/qmckl_blas_f.f90 IRPF90_temp/qmckl_dgemm.c
+SRC= qmckl_blas_f.f90 qmckl_dgemm.c
 OBJ= IRPF90_temp/qmckl_blas_f.o   IRPF90_temp/qmckl_dgemm.o
 LIB= -mkl=sequential -lgomp
 
 -include irpf90.make
 export
 
-#irpf90.make: IRPF90_temp/qmckl_blas_f.o
+irpf90.make: IRPF90_temp/qmckl_blas_f.o
 irpf90.make: $(filter-out IRPF90_temp/%, $(wildcard */*.irp.f)) $(wildcard *.irp.f) $(wildcard *.inc.f) Makefile
 	$(IRPF90)
 
+IRPF90_temp/%.f90: %.f90
 IRPF90_temp/%.c: %.c
+
+IRPF90_temp/%.o: %.f90
+	$(FC) $(FCFLAGS) -g -c $< -o $@
 
 IRPF90_temp/%.o: %.c
 	$(CC) -g -c $< -o $@

@@ -1,6 +1,11 @@
 /* Generated from qmckl_dgemm.org */
 
 #include <cblas.h>
+#include <stdint.h>
+#include <assert.h>
+#include <stdlib.h>
+
+
 
 struct dgemm_args {
   double alpha;
@@ -19,7 +24,7 @@ struct dgemm_args {
 };
 
 
-#define MIN_SIZE 512 
+#define MIN_SIZE 512
 #include<stdio.h>
 
 static void qmckl_dgemm_rec(struct dgemm_args args) {
@@ -29,6 +34,7 @@ static void qmckl_dgemm_rec(struct dgemm_args args) {
   if ( (args.m <= MIN_SIZE) || (args.n <= MIN_SIZE)) {
     #pragma omp task
     {
+      printf("BLAS %5d %5d %5d\n", args.m, args.n, args.k);
       cblas_dgemm(CblasColMajor, args.transa, args.transb,
                   args.m, args.n, args.k, args.alpha,
                   args.A, args.lda, args.B, args.ldb,
@@ -90,40 +96,50 @@ void qmckl_dgemm(char transa, char transb,
                  double* A, int lda,
                  double* B, int ldb,
                  double beta,
-                 double* C, int ldc)
+                 double* C, int ldc,
+                 int64_t* result)
 {
-  struct dgemm_args args;
+  struct dgemm_args* args = (struct dgemm_args*) malloc (sizeof(struct dgemm_args));
+  assert (args != NULL);
+  *result = (int64_t) args;
 
-  args.alpha = alpha;
-  args.beta  = beta ;
-  args.A = A;
-  args.B = B;
-  args.C = C;
-  args.m = m;
-  args.n = n;
-  args.k = k;
-  args.lda = lda;
-  args.ldb = ldb;
-  args.ldc = ldc;
+  args->alpha = alpha;
+  args->beta  = beta ;
+  args->A = A;
+  args->B = B;
+  args->C = C;
+  args->m = m;
+  args->n = n;
+  args->k = k;
+  args->lda = lda;
+  args->ldb = ldb;
+  args->ldc = ldc;
 
   if (transa == 'T' || transa == 't') {
-    args.transa = CblasTrans;
+    args->transa = CblasTrans;
   } else {
-    args.transa = CblasNoTrans;
+    args->transa = CblasNoTrans;
   }
 
-  CBLAS_LAYOUT tb;
   if (transa == 'T' || transa == 't') {
-    args.transb = CblasTrans;
+    args->transb = CblasTrans;
   } else {
-    args.transb = CblasNoTrans;
+    args->transb = CblasNoTrans;
   }
 
+}
+
+
+void qmckl_tasks_run(struct dgemm_args** gemms, int ngemms)
+{
   #pragma omp parallel
   {
     #pragma omp single
     {
-      qmckl_dgemm_rec(args);
+      for (int i=0 ; i<ngemms ; ++i)
+      {
+        qmckl_dgemm_rec(*(gemms[i]));
+      }
     }
     #pragma omp taskwait
   }

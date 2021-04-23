@@ -5,6 +5,26 @@
 Generated from qmckl_dgemm.org
 #+END_SRC
 
+   #+BEGIN_SRC c :noweb yes :tangle qmckl_dgemm.c
+/* <<header>> */
+
+#include <cblas.h>
+#include <stdint.h>
+#include <assert.h>
+#include <stdlib.h>
+
+<<tasks_init>>
+
+<<dgemm_args>>
+
+<<dgemm_rec>>
+
+<<dgemm>>
+
+<<tasks_run>>
+
+   #+END_SRC
+
 * Fortran interface
 
 #+BEGIN_SRC f90 :noweb yes :tangle qmckl_blas_f.f90
@@ -15,25 +35,37 @@ module qmckl_blas
 
   interface
      subroutine qmckl_dgemm(transa, transb, m, n, k, &
-          alpha, A, lda, B, ldb, beta, C, ldc) bind(C)
+          alpha, A, lda, B, ldb, beta, C, ldc, res) bind(C)
        use :: iso_c_binding
        implicit none
        character(kind=c_char  ), value :: transa, transb
        integer  (kind=c_int   ), value :: m, n, k, lda, ldb, ldc
        real     (kind=c_double), value :: alpha, beta
        real     (kind=c_double)        :: A(lda,*), B(ldb,*), C(ldc,*)
+       integer  (kind=c_int64_t)       :: res
      end subroutine qmckl_dgemm
+  end interface
+
+  interface
+     subroutine qmckl_tasks_run(gemms, ngemms) bind(C)
+       use :: iso_c_binding
+       implicit none
+       integer (kind=c_int32_t), value :: ngemms
+       integer (kind=c_int64_t)        :: gemms(ngemms)
+     end subroutine qmckl_tasks_run
   end interface
 
 end module qmckl_blas
 #+END_SRC
 
 * TODO C code
-  To avoid passing too many arguments to recursive subroutines, we put
-  all the arguments in a struct.
 
-  #+NAME: dgemm_args
-  #+BEGIN_SRC c
+  
+   The main function packs the arguments in the struct and returns
+   the struct as a result.
+
+   #+NAME: dgemm_args
+   #+BEGIN_SRC c
 struct dgemm_args {
   double alpha;
   double beta;
@@ -50,64 +82,76 @@ struct dgemm_args {
   CBLAS_LAYOUT transb;
 };
 
-  #+END_SRC
+   #+END_SRC
 
-  The driver routine packs the arguments in the struct and calls the
-  recursive routine.
-
-  #+NAME: dgemm
-  #+BEGIN_SRC c
+   #+NAME: dgemm
+   #+BEGIN_SRC c
 void qmckl_dgemm(char transa, char transb,
                  int m, int n, int k,
                  double alpha,
                  double* A, int lda,
                  double* B, int ldb,
                  double beta,
-                 double* C, int ldc)
+                 double* C, int ldc,
+                 int64_t* result)
 {
-  struct dgemm_args args;
+  struct dgemm_args* args = (struct dgemm_args*) malloc (sizeof(struct dgemm_args));
+  assert (args != NULL);
+  *result = (int64_t) args;
 
-  args.alpha = alpha;
-  args.beta  = beta ;
-  args.A = A;
-  args.B = B;
-  args.C = C;
-  args.m = m;
-  args.n = n;
-  args.k = k;
-  args.lda = lda;
-  args.ldb = ldb;
-  args.ldc = ldc;
+  args->alpha = alpha;
+  args->beta  = beta ;
+  args->A = A;
+  args->B = B;
+  args->C = C;
+  args->m = m;
+  args->n = n;
+  args->k = k;
+  args->lda = lda;
+  args->ldb = ldb;
+  args->ldc = ldc;
 
   if (transa == 'T' || transa == 't') {
-    args.transa = CblasTrans;
+    args->transa = CblasTrans;
   } else {
-    args.transa = CblasNoTrans;
+    args->transa = CblasNoTrans;
   }
 
-  CBLAS_LAYOUT tb;
   if (transa == 'T' || transa == 't') {
-    args.transb = CblasTrans;
+    args->transb = CblasTrans;
   } else {
-    args.transb = CblasNoTrans;
+    args->transb = CblasNoTrans;
   }
 
+}
+
+   #+END_SRC
+
+  To run the dgemms as tasks, pass all the dgemms to do to the
+  following function. It call task-based the recursive dgemm defined below.
+  
+   #+NAME: tasks_run
+   #+BEGIN_SRC c
+void qmckl_tasks_run(struct dgemm_args** gemms, int ngemms)
+{
   #pragma omp parallel
   {
     #pragma omp single
     {
-      qmckl_dgemm_rec(args);
+      for (int i=0 ; i<ngemms ; ++i)
+      {
+        qmckl_dgemm_rec(*(gemms[i]));
+      }
     }
     #pragma omp taskwait
   }
 }
+   #+END_SRC
+  
 
-  #+END_SRC
-
-
-  #+NAME: dgemm_rec
-  #+BEGIN_SRC c
-#define MIN_SIZE 512 
+   #+NAME: dgemm_rec
+   #+BEGIN_SRC c
+#define MIN_SIZE 512
 #include<stdio.h>
 
 static void qmckl_dgemm_rec(struct dgemm_args args) {
@@ -117,6 +161,7 @@ static void qmckl_dgemm_rec(struct dgemm_args args) {
   if ( (args.m <= MIN_SIZE) || (args.n <= MIN_SIZE)) {
     #pragma omp task
     {
+      printf("BLAS %5d %5d %5d\n", args.m, args.n, args.k);
       cblas_dgemm(CblasColMajor, args.transa, args.transb,
                   args.m, args.n, args.k, args.alpha,
                   args.A, args.lda, args.B, args.ldb,
@@ -171,17 +216,6 @@ static void qmckl_dgemm_rec(struct dgemm_args args) {
   }
 
 }
-  #+END_SRC
+   #+END_SRC
 
-  #+BEGIN_SRC c :noweb yes :tangle qmckl_dgemm.c
-/* <<header>> */
-
-#include <cblas.h>
-
-<<dgemm_args>>
-
-<<dgemm_rec>>
-
-<<dgemm>>
-  #+END_SRC
 
