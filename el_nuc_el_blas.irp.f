@@ -13,7 +13,7 @@
 
  ! r_{ij}^k . R_{ja}^l -> tmp_c_{ia}^{kl}
  do k=0,ncord-1
-   call dgemm('N','N', nelec, nnuc*(ncord+1), nelec, 1.d0,           &
+   call qmckl_dgemm('N','N', nelec, nnuc*(ncord+1), nelec, 1.d0,     &
        rescale_een_e(1,1,k), size(rescale_een_e,1),                  &
        rescale_een_n(1,1,0), size(rescale_een_n,1), 0.d0,            &
        tmp_c(1,1,0,k), size(tmp_c,1))
@@ -21,7 +21,7 @@
 
  ! dr_{ij}^k . R_{ja}^l -> dtmp_c_{ia}^{kl}
  do k=0,ncord-1
-   call dgemm('N','N', 4*nelec_8, nnuc*(ncord+1), nelec, 1.d0,         &
+   call qmckl_dgemm('N','N', 4*nelec_8, nnuc*(ncord+1), nelec, 1.d0, &
        rescale_een_e_deriv_e(1,1,1,k),                               &
        size(rescale_een_e_deriv_e,1)*size(rescale_een_e_deriv_e,2),  &
        rescale_een_n(1,1,0),                                         &
