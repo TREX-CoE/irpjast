@@ -92,7 +92,14 @@ void qmckl_dgemm(char transa, char transb,
     args.transb = CblasNoTrans;
   }
 
-  qmckl_dgemm_rec(args);
+  #pragma omp parallel
+  {
+    #pragma omp single
+    {
+      qmckl_dgemm_rec(args);
+    }
+    #pragma omp taskwait
+  }
 }
 
   #+END_SRC
@@ -108,44 +115,59 @@ static void qmckl_dgemm_rec(struct dgemm_args args) {
 //  printf("%5d %5d\n", args.m, args.n);
 
   if ( (args.m <= MIN_SIZE) || (args.n <= MIN_SIZE)) {
-    cblas_dgemm(CblasColMajor, args.transa, args.transb,
-                args.m, args.n, args.k, args.alpha,
-                args.A, args.lda, args.B, args.ldb,
-                args.beta, args.C, args.ldc);
+    #pragma omp task
+    {
+      cblas_dgemm(CblasColMajor, args.transa, args.transb,
+                  args.m, args.n, args.k, args.alpha,
+                  args.A, args.lda, args.B, args.ldb,
+                  args.beta, args.C, args.ldc);
+    }
   } else {
 
     int m1 = args.m / 2;
     int m2 = args.m - m1;
     int n1 = args.n / 2;
     int n2 = args.n - n1;
-
-    struct dgemm_args args_1 = args;
-    args_1.m = m1;
-    args_1.n = n1;
-    qmckl_dgemm_rec(args_1);
-
-    // TODO: assuming 'N', 'N' here
-    struct dgemm_args args_2 = args;
-    args_2.B = args.B + args.ldb*n1;
-    args_2.C = args.C + args.ldc*n1;
-    args_2.m = m1;
-    args_2.n = n2;
-    qmckl_dgemm_rec(args_2);
-
-    struct dgemm_args args_3 = args;
-    args_3.A = args.A + m1;
-    args_3.C = args.C + m1;
-    args_3.m = m2;
-    args_3.n = n1;
-    qmckl_dgemm_rec(args_3);
-
-    struct dgemm_args args_4 = args;
-    args_4.A = args.A + m1;
-    args_4.B = args.B + args.ldb*n1;
-    args_4.C = args.C + m1 + args.ldc*n1;
-    args_4.m = m2;
-    args_4.n = n2;
-    qmckl_dgemm_rec(args_4);
+      
+    #pragma omp task
+    {
+      struct dgemm_args args_1 = args;
+      args_1.m = m1;
+      args_1.n = n1;
+      qmckl_dgemm_rec(args_1);
+    }
+    
+    #pragma omp task
+    {
+      // TODO: assuming 'N', 'N' here
+      struct dgemm_args args_2 = args;
+      args_2.B = args.B + args.ldb*n1;
+      args_2.C = args.C + args.ldc*n1;
+      args_2.m = m1;
+      args_2.n = n2;
+      qmckl_dgemm_rec(args_2);
+    }
+    
+    #pragma omp task
+    {
+      struct dgemm_args args_3 = args;
+      args_3.A = args.A + m1;
+      args_3.C = args.C + m1;
+      args_3.m = m2;
+      args_3.n = n1;
+      qmckl_dgemm_rec(args_3);
+    }
+    
+    #pragma omp task
+    {
+      struct dgemm_args args_4 = args;
+      args_4.A = args.A + m1;
+      args_4.B = args.B + args.ldb*n1;
+      args_4.C = args.C + m1 + args.ldc*n1;
+      args_4.m = m2;
+      args_4.n = n2;
+      qmckl_dgemm_rec(args_4);
+    }
   }
 
 }
