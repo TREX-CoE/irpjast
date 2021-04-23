@@ -13,9 +13,11 @@ LIB= -mkl=sequential
 -include irpf90.make
 export
 
-irpf90.make: qmckl_blas_f.o
+#irpf90.make: IRPF90_temp/qmckl_blas_f.o
 irpf90.make: $(filter-out IRPF90_temp/%, $(wildcard */*.irp.f)) $(wildcard *.irp.f) $(wildcard *.inc.f) Makefile
 	$(IRPF90)
 
+IRPF90_temp/%.c: %.c
+
 IRPF90_temp/%.o: %.c
-	$(CC) -c $< -o $@
+	$(CC) -g -c $< -o $@

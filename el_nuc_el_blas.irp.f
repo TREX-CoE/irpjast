@@ -1,5 +1,6 @@
  BEGIN_PROVIDER [ double precision,  tmp_c, (nelec_8,nnuc,0:ncord,0:ncord-1) ]
 &BEGIN_PROVIDER [ double precision, dtmp_c, (nelec_8,4,nnuc,0:ncord,0:ncord-1) ]
+ use qmckl_blas
  implicit none
  BEGIN_DOC
  ! Calculate the intermediate buffers
