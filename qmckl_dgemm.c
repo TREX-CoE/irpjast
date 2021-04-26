@@ -2,7 +2,7 @@
 
 #include <starpu.h>
 
-#include <cblas.h>
+#include <mkl_cblas.h>
 #include <stdint.h>
 #include <assert.h>
 #include <stdlib.h>
@@ -177,6 +177,7 @@ void qmckl_tasks_run(struct dgemm_args** gemms, int ngemms)
   int rc = starpu_init(NULL);
   assert (rc == 0);
 
+
   starpu_data_handle_t matrix_handle[ngemms][3];
   for (int i=0 ; i<ngemms ; ++i)
     {
@@ -184,24 +185,24 @@ void qmckl_tasks_run(struct dgemm_args** gemms, int ngemms)
                                     STARPU_MAIN_RAM,
                                     (uintptr_t) gemms[i]->A,
                                     gemms[i]->lda,
-                                    gemms[i]->k,
                                     gemms[i]->m,
+                                    gemms[i]->k,
                                     sizeof(double));
 
       starpu_matrix_data_register(&(matrix_handle[i][1]),
                                     STARPU_MAIN_RAM,
                                     (uintptr_t) gemms[i]->B,
                                     gemms[i]->ldb,
-                                    gemms[i]->n,
                                     gemms[i]->k,
+                                    gemms[i]->n,
                                     sizeof(double));
 
       starpu_matrix_data_register(&(matrix_handle[i][2]),
                                     STARPU_MAIN_RAM,
                                     (uintptr_t) gemms[i]->C,
                                     gemms[i]->ldc,
-                                    gemms[i]->n,
                                     gemms[i]->m,
+                                    gemms[i]->n,
                                     sizeof(double));
 
       struct starpu_task *task = starpu_task_create();
