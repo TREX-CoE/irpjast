@@ -2,11 +2,21 @@
 
 #include <starpu.h>
 
-#include <mkl_cblas.h>
 #include <stdint.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
+
+//#define CPU_ENABLED 1
+
+#ifdef CPU_ENABLED
+#include <cuda.h>
+#include <starpu_cublas_v2.h>
+#endif
+
+void f_dgemm(const char transa, const char transb, const int m, const int n, const int k,
+             const double alpha, const double* A, const int lda, const double* B,
+	     const int ldb, const double beta, double* C, const int ldc);
 
 
 
@@ -22,28 +32,38 @@ struct dgemm_args {
   int lda;
   int ldb;
   int ldc;
-  CBLAS_LAYOUT transa;
-  CBLAS_LAYOUT transb;
+  char transa;
+  char transb;
 };
 
 
-void qmckl_dgemm_cl(struct dgemm_args args, double* A, double* B, double* C);
-
-void dgemm_codelet(void *buffers[], void* cl_arg)
+void dgemm_codelet_cpu(void *buffers[], void* cl_arg)
 {
   struct dgemm_args *args = cl_arg;
   double* A = (double*) STARPU_MATRIX_GET_PTR(buffers[0]);
   double* B = (double*) STARPU_MATRIX_GET_PTR(buffers[1]);
   double* C = (double*) STARPU_MATRIX_GET_PTR(buffers[2]);
-  qmckl_dgemm_cl(*args, A, B, C);
+
+  int lda = STARPU_MATRIX_GET_LD(buffers[0]);
+  int ldb = STARPU_MATRIX_GET_LD(buffers[1]);
+  int ldc = STARPU_MATRIX_GET_LD(buffers[2]);
+
+  int m = STARPU_MATRIX_GET_NX(buffers[2]);
+  int n = STARPU_MATRIX_GET_NY(buffers[2]);
+  int k = STARPU_MATRIX_GET_NY(buffers[0]);
+
+  f_dgemm(args->transa, args->transb,
+          m, n, k, args->alpha,
+          A, lda, B, ldb, args->beta, C, ldc);
+
   free(args);
 }
 
 struct starpu_codelet dgemm_cl =
   {
    .where = STARPU_CPU,
-   .cpu_funcs = { dgemm_codelet },
-   .cpu_funcs_name = { "dgemm_codelet" },
+   .cpu_funcs = { dgemm_codelet_cpu },
+   .cpu_funcs_name = { "dgemm_codelet_cpu" },
    .nbuffers = 3,
    .max_parallelism = 1,
    .modes = {STARPU_R, STARPU_R, STARPU_RW},
@@ -51,13 +71,6 @@ struct starpu_codelet dgemm_cl =
   };
 
 #include<stdio.h>
-
-void qmckl_dgemm_cl(struct dgemm_args args, double* A, double* B, double* C) {
-    cblas_dgemm(CblasColMajor, args.transa, args.transb,
-                args.m, args.n, args.k, args.alpha,
-                A, args.lda, B, args.ldb,
-                args.beta, C, args.ldc);
-}
 
 static struct dgemm_args* qmckl_dgemm_to_struct(char transa, char transb,
                  int m, int n, int k,
@@ -70,6 +83,25 @@ static struct dgemm_args* qmckl_dgemm_to_struct(char transa, char transb,
   struct dgemm_args* args = (struct dgemm_args*) malloc (sizeof(struct dgemm_args));
   assert (args != NULL);
 
+  int dima = (transa == 'T' || transa == 't') ? m : k;
+  int dimb = (transb == 'T' || transb == 't') ? k : n;
+/*
+  double* A2;
+  double* B2;
+  double* C2;
+
+  starpu_malloc_flags((void **)&A2,
+		  lda*dima*sizeof(double),
+		  STARPU_MALLOC_PINNED);
+
+  starpu_malloc_flags((void **)&B2,
+		  lda*dima*sizeof(double),
+		  STARPU_MALLOC_PINNED);
+
+  starpu_malloc_flags((void **)&C2,
+		  lda*dima*sizeof(double),
+		  STARPU_MALLOC_PINNED);
+*/
   args->alpha = alpha;
   args->beta  = beta ;
   args->A = A;
@@ -81,18 +113,8 @@ static struct dgemm_args* qmckl_dgemm_to_struct(char transa, char transb,
   args->lda = lda;
   args->ldb = ldb;
   args->ldc = ldc;
-
-  if (transa == 'T' || transa == 't') {
-    args->transa = CblasTrans;
-  } else {
-    args->transa = CblasNoTrans;
-  }
-
-  if (transa == 'T' || transa == 't') {
-    args->transb = CblasTrans;
-  } else {
-    args->transb = CblasNoTrans;
-  }
+  args->transa = transa;
+  args->transb = transb;
   return args;
 
 }
@@ -177,7 +199,6 @@ void qmckl_tasks_run(struct dgemm_args** gemms, int ngemms)
   int rc = starpu_init(NULL);
   assert (rc == 0);
 
-
   starpu_data_handle_t matrix_handle[ngemms][3];
   for (int i=0 ; i<ngemms ; ++i)
     {
@@ -224,6 +245,7 @@ void qmckl_tasks_run(struct dgemm_args** gemms, int ngemms)
       starpu_data_unregister(matrix_handle[i][1]);
       starpu_data_unregister(matrix_handle[i][2]);
     }
+
   starpu_shutdown();
 }
 

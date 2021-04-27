@@ -25,5 +25,17 @@ module qmckl_blas
        integer (kind=c_int64_t)        :: tasks(ntasks)
      end subroutine qmckl_tasks_run
   end interface
-
 end module qmckl_blas
+
+subroutine f_dgemm(TRANSA, TRANSB, M, N, K, ALPHA, A, LDA, B, LDB, BETA, C, LDC) &
+          bind(C, name='f_dgemm')
+  use iso_c_binding
+  implicit none
+  character, intent(in), value :: TRANSA, TRANSB
+  integer, intent(in), value   :: M,N,K,LDA,LDB,LDC
+  double precision, intent(in), value :: ALPHA, BETA
+  double precision, intent(in) :: A(LDA,*), B(LDB,*)
+  double precision, intent(out) :: C(LDC,*)
+  call dgemm(TRANSA, TRANSB, M, N, K, ALPHA, A, LDA, B, LDB, BETA, C, LDC)
+end subroutine
+

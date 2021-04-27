@@ -10,7 +10,7 @@ RANLIB = ranlib
 
 SRC= qmckl_blas_f.f90 qmckl_dgemm.c
 OBJ= IRPF90_temp/qmckl_blas_f.o   IRPF90_temp/qmckl_dgemm.o
-LIB= -mkl=sequential $(shell pkg-config --libs $(STARPU) )
+LIB= -mkl=sequential $(shell pkg-config --libs $(STARPU) magma)
 
 -include irpf90.make
 export
