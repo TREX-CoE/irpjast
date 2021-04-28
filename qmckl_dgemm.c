@@ -91,10 +91,14 @@ void dgemm_codelet_gpu(void *buffers[], void* cl_arg)
 }
 #endif
 
+static struct starpu_perfmodel perf_model =
+{
+    .type = STARPU_HISTORY_BASED,
+    .symbol = "my_perfmodel",
+};
+
 struct starpu_codelet dgemm_cl =
   {
-//   .where = STARPU_CPU,
-//   .where = STARPU_CUDA,
    .where = STARPU_CPU | STARPU_CUDA,
    .cpu_funcs = { dgemm_codelet_cpu },
    .cpu_funcs_name = { "dgemm_codelet_cpu" },
@@ -105,6 +109,7 @@ struct starpu_codelet dgemm_cl =
    .nbuffers = 3,
    .max_parallelism = 1,
    .modes = {STARPU_R, STARPU_R, STARPU_RW},
+   .model = &perf_model,
   };
 
 #include<stdio.h>
@@ -138,14 +143,13 @@ static struct dgemm_args* qmckl_dgemm_to_struct(char transa, char transb,
 
 }
 
-#define MIN_SIZE 20480
+#define MIN_SIZE 4096*4096
 static void qmckl_dgemm_rec(struct dgemm_args args, int64_t* tasks, int64_t* ntasks)
 {
 
 
-  if ( args.m * args.n <= MIN_SIZE*MIN_SIZE) {
+  if ( args.m * args.n <= MIN_SIZE) {
 
-//    printf("%5d %5d\n", args.m, args.n);
       struct dgemm_args* args_new = (struct dgemm_args*) malloc (sizeof(struct dgemm_args));
       memcpy(args_new, &args, sizeof(args));
       tasks[*ntasks] = (int64_t) args_new;
@@ -225,6 +229,7 @@ void qmckl_tasks_run(struct dgemm_args** gemms, int ngemms)
   assert (rc == 0);
 
   starpu_data_handle_t matrix_handle[ngemms][3];
+
   for (int i=0 ; i<ngemms ; ++i)
     {
       starpu_matrix_data_register(&(matrix_handle[i][0]),
