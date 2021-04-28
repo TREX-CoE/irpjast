@@ -25,6 +25,24 @@ module qmckl_blas
        integer (kind=c_int64_t)        :: tasks(ntasks)
      end subroutine qmckl_tasks_run
   end interface
+
+  interface 
+    subroutine alloc(A, sze) bind(C)
+      use :: iso_c_binding
+      implicit none
+      type(c_ptr) :: A
+      integer(c_size_t), value :: sze
+    end subroutine
+  end interface
+
+  interface 
+    subroutine free(A) bind(C,name='starpu_free')
+      use :: iso_c_binding
+      implicit none
+      type(c_ptr), value :: A
+    end subroutine
+  end interface
+
 end module qmckl_blas
 
 subroutine f_dgemm(TRANSA, TRANSB, M, N, K, ALPHA, A, LDA, B, LDB, BETA, C, LDC) &

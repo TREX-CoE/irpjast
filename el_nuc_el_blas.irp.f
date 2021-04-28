@@ -14,6 +14,21 @@
  integer*8 :: tasks(100000), ntasks
 
  ntasks = 0_8
+
+! type(c_ptr) :: ptr_a, ptr_b, ptr_c, ptr_d, ptr_e
+! double precision, pointer :: A(:,:,:), B(:,:,:), C(:,:,:,:), D(:,:,:,:), E(:,:,:,:,:)
+
+! call alloc(ptr_a, int(size(rescale_een_e),8))
+! call c_f_pointer(ptr_a, A, shape(rescale_een_e))
+! A(:,:,:) = rescale_een_e(:,:,:)
+!
+! call alloc(ptr_b, int(size(rescale_een_n),8))
+! call c_f_pointer(ptr_b, B, shape(rescale_een_n))
+! B(:,:,:) = rescale_een_n(:,:,:)
+!
+! call alloc(ptr_c, int(size(tmp_c),8))
+! call c_f_pointer(ptr_c, C, shape(tmp_c))
+
  ! r_{ij}^k . R_{ja}^l -> tmp_c_{ia}^{kl}
  do k=0,ncord-1
    do l=0,ncord
@@ -21,8 +36,19 @@
        rescale_een_e(1,1,k), size(rescale_een_e,1),                  &
        rescale_een_n(1,1,l), size(rescale_een_n,1), 0.d0,            &
        tmp_c(1,1,l,k), size(tmp_c,1), tasks, ntasks)
+!     call qmckl_dgemm('N','N', nelec, nnuc, nelec, 1.d0,     &
+!      A(:,:,k), size(rescale_een_e,1),                  &
+!      B(:,:,l), size(rescale_een_n,1), 0.d0,            &
+!      C(:,:,l,k), size(tmp_c,1), tasks, ntasks)
    enddo
  enddo
+
+!call alloc(ptr_d, int(size(rescale_een_e_deriv_e),8))
+!call c_f_pointer(ptr_d, D, shape(rescale_een_e_deriv_e))
+!D(:,:,:,:) = rescale_een_e_deriv_e(:,:,:,:)
+
+!call alloc(ptr_e, int(size(dtmp_c),8))
+!call c_f_pointer(ptr_e, E, shape(dtmp_c))
 
  ! dr_{ij}^k . R_{ja}^l -> dtmp_c_{ia}^{kl}
  do k=0,ncord-1
@@ -34,11 +60,26 @@
        size(rescale_een_n,1), 0.d0,                                  &
        dtmp_c(1,1,1,l,k), size(dtmp_c,1)*size(dtmp_c,2), &
        tasks, ntasks)
+
+!     call qmckl_dgemm('N','N', nelec_8*4, nnuc, nelec, 1.d0, &
+!      D(:,:,:,k),                               &
+!      size(rescale_een_e_deriv_e,1)*size(rescale_een_e_deriv_e,2),  &
+!      B(:,:,l),                                         &
+!      size(rescale_een_n,1), 0.d0,                                  &
+!      E(:,:,:,l,k), size(dtmp_c,1)*size(dtmp_c,2), &
+!      tasks, ntasks)
     enddo
  enddo
 
  print *, ntasks, ' tasks'
  call qmckl_tasks_run(tasks, ntasks)
+! tmp_c(:,:,:,:) = C(:,:,:,:)
+! dtmp_c(:,:,:,:,:) = E(:,:,:,:,:)
+! call free(ptr_a)
+! call free(ptr_b)
+! call free(ptr_c)
+! call free(ptr_d)
+! call free(ptr_e)
 
 END_PROVIDER
 
