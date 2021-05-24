@@ -1,5 +1,4 @@
 import numpy as np
-import matplotlib.pyplot as plt
 
 def get_sphere_distribution(n, dmin, Ls, maxiter=1e4, allow_wall=True):
     """Get random points in a box with given dimensions and minimum separation.

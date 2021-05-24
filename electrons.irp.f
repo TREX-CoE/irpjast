@@ -3,7 +3,8 @@ BEGIN_PROVIDER [ integer, nelec ]
  BEGIN_DOC
  ! Number of electrons
  END_DOC
- nelec = 2304
+ !nelec = 2304
+ nelec = 4000
  !read(*,*)nelec
 END_PROVIDER
 
