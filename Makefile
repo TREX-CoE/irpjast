@@ -1,4 +1,4 @@
-FC     = ifort -O3 -ip -g  -march=native -align array64byte -fma -ftz -fomit-frame-pointer -mkl=parallel #-O3 -march=native -mkl=sequential -g -I$(PWD) #-xHost -check all 
+FC     = ifort -O3 -ip -g -xHost -align array64byte -fma -ftz -fomit-frame-pointer -mkl=parallel #-O3 -march=native -mkl=sequential -g -I$(PWD) #-xHost -check all 
 CC     = gcc
 CPP    = g++ -O2 -march=native # -Wall
 FCFLAGS= -I .#-O2 -ffree-line-length-none -I .
