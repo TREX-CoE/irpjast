@@ -12,11 +12,11 @@
            real(KIND=C_DOUBLE):: C(m,n)
            end subroutine run_magma_dgemm_async_gpu_c
            subroutine run_starpu_dgemm_hybrid_c(A, B, C, m, n, k,&
-               nslicesx, nslicesy) bind(C)
+               nslicesx, nslicesy, nsteps) bind(C)
            use :: ISO_C_BINDING
            implicit none
            integer(KIND=C_INT), value :: n,m,k
-           integer(KIND=C_INT), value :: nslicesx, nslicesy
+           integer(KIND=C_INT), value :: nslicesx, nslicesy, nsteps
            real(KIND=C_DOUBLE):: A(m,k)
            real(KIND=C_DOUBLE):: B(k,n)
            real(KIND=C_DOUBLE):: C(m,n)

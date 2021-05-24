@@ -120,7 +120,7 @@ END_PROVIDER
  call run_init_starpu_c()
 
  ! r_{ij}^k . R_{ja}^l -> tmp_c_{ia}^{kl}
- do k=0,ncord-1
+ !do k=0,ncord-1
 
    !call run_magma_dgemm_async_gpu_c(rescale_een_e(1,1,k),       &
    !                                rescale_een_n(1,1,0), &
@@ -131,12 +131,12 @@ END_PROVIDER
    !                                size(rescale_een_n,1),    &
    !                                size(tmp_c1,1))
 
-   call run_starpu_dgemm_hybrid_c(rescale_een_e(1,1,k),          &
+   call run_starpu_dgemm_hybrid_c(rescale_een_e(1,1,0),          &
                                   rescale_een_n(1,1,0),          &
-                                  tmp_c1(1,1,0,k),               &
+                                  tmp_c1(1,1,0,0),               &
                                   nelec_16, nnuc_16*(ncord+1),   &
                                   nelec_16,                      &
-                                  1,1)
+                                  1,1, ncord)
 
    !do i = 0, ntiles_nelec - 1
    !  do j = 0, ntiles_nelec - 1
@@ -168,10 +168,10 @@ END_PROVIDER
    !    enddo
    !  enddo
    !enddo
- enddo
+ !enddo
 
  ! dr_{ij}^k . R_{ja}^l -> dtmp_c_{ia}^{kl}
- do k=0,ncord-1
+ !do k=0,ncord-1
    !call run_magma_dgemm_async_gpu_c(rescale_een_e_deriv_e(1,1,1,k), &
    !                                rescale_een_n(1,1,0),            &
    !                                dtmp_c1(1,1,1,0,k),               &
@@ -180,12 +180,12 @@ END_PROVIDER
    !                                4*size(rescale_een_e_deriv_e,1),     &
    !                                size(rescale_een_n,1),               &
    !                                4*size(dtmp_c1,1))
-   call run_starpu_dgemm_hybrid_c(rescale_een_e_deriv_e(1,1,1,k),          &
+   call run_starpu_dgemm_hybrid_c(rescale_een_e_deriv_e(1,1,1,0),          &
                                   rescale_een_n(1,1,0),                    &
-                                  dtmp_c1(1,1,1,0,k),                      &
+                                  dtmp_c1(1,1,1,0,0),                      &
                                   4*nelec_16, nnuc_16*(ncord+1),           &
                                   nelec_16,                                &
-                                  1,1)
+                                  1,1, ncord)
 
    !do i = 0, ntiles_nelec - 1
    !  do j = 0, ntiles_nelec - 1
@@ -229,7 +229,7 @@ END_PROVIDER
    !    enddo
    !  enddo
    !enddo
- enddo
+ !enddo
 
  call run_stop_starpu_c()
 
