@@ -72,52 +72,62 @@ static void check_output(void)
 static void init_problem_data(TYPE *A_inp, TYPE *B_inp, TYPE *C_inp)
 {
 #ifndef STARPU_SIMGRID
-	unsigned i,j;
+	unsigned i,j,k;
 
-	starpu_malloc((void **)&A, zdim*ydim*sizeof(TYPE));
-	starpu_malloc((void **)&B, xdim*zdim*sizeof(TYPE));
-	starpu_malloc((void **)&C, xdim*ydim*sizeof(TYPE));
+	starpu_malloc((void **)&A, zdim*ydim*nsteps*sizeof(TYPE));
+	starpu_malloc((void **)&B, xdim*zdim*nsteps*sizeof(TYPE));
+	starpu_malloc((void **)&C, xdim*ydim*nsteps*sizeof(TYPE));
 
 	/* fill the A and B matrices */
+	for (k=0; k < nsteps; k++)
+  {
 		for (i=0; i < zdim; i++)
 		{
-	for (j=0; j < ydim; j++)
-	{
-			A[j+i*ydim] = A_inp[j+i*ydim];
-		}
-	}
+	    for (j=0; j < ydim; j++)
+	    {
+	    		A[j+i*ydim+k*(ydim*nsteps)] = A_inp[j+i*ydim+k*(ydim*nsteps)];
+		  }
+  	}
+  }
 
+	for (k=0; k < nsteps; k++)
+  {
 		for (i=0; i < xdim; i++)
 		{
-	for (j=0; j < zdim; j++)
-	{
-			B[j+i*zdim] = B_inp[j+i*zdim];
-		}
-	}
+	    for (j=0; j < zdim; j++)
+	    {
+	    		B[j+i*zdim+k*(zdim*nsteps)] = B_inp[j+i*zdim+k*(zdim*nsteps)];
+		  }
+  	}
+  }
 
+	for (k=0; k < nsteps; k++)
+  {
 		for (i=0; i < xdim; i++)
 		{
-	for (j=0; j < ydim; j++)
-	{
-			C[j+i*ydim] = C_inp[j+i*ydim];
-		}
-	}
+	    for (j=0; j < ydim; j++)
+	    {
+	    		C[j+i*ydim+k*(ydim*nsteps)] = C_inp[j+i*ydim+k*(ydim*nsteps)];
+		  }
+  	}
+  }
+
 #endif
 }
 
 static void partition_mult_data(void)
 {
 	starpu_matrix_data_register(&A_handle, 0, (uintptr_t)A,
-		ydim, ydim, zdim, sizeof(TYPE));
+		ydim, ydim, zdim*nsteps, sizeof(TYPE));
 	starpu_matrix_data_register(&B_handle, 0, (uintptr_t)B,
-		zdim, zdim, xdim, sizeof(TYPE));
+		zdim, zdim, xdim*nsteps, sizeof(TYPE));
 	starpu_matrix_data_register(&C_handle, 0, (uintptr_t)C,
-		ydim, ydim, xdim, sizeof(TYPE));
+		ydim, ydim, xdim*nsteps, sizeof(TYPE));
 
 	struct starpu_data_filter vert;
 	memset(&vert, 0, sizeof(vert));
 	vert.filter_func = starpu_matrix_filter_vertical_block;
-	vert.nchildren = nslicesx;
+	vert.nchildren = nslicesx*nsteps;
 
 	struct starpu_data_filter horiz;
 	memset(&horiz, 0, sizeof(horiz));
@@ -317,7 +327,7 @@ int run_init_starpu_c(){
 };
 
 int run_starpu_dgemm_hybrid_c(TYPE *A_inp, TYPE *B_inp, TYPE *C_inp, unsigned int ydim_inp, 
-    unsigned int xdim_inp, unsigned int zdim_inp, unsigned int nslicesx_inp, unsigned int nslicesy_inp)
+    unsigned int xdim_inp, unsigned int zdim_inp, unsigned int nslicesx_inp, unsigned int nslicesy_inp, unsigned int nsteps_inp)
 {
 	double start, end;
 	int ret;
@@ -331,6 +341,7 @@ int run_starpu_dgemm_hybrid_c(TYPE *A_inp, TYPE *B_inp, TYPE *C_inp, unsigned in
   xdim = xdim_inp;
   ydim = ydim_inp;
   zdim = zdim_inp;
+  nsteps = nsteps_inp;
 
 #ifdef STARPU_QUICK_CHECK
 	niter /= 10;
@@ -341,7 +352,8 @@ int run_starpu_dgemm_hybrid_c(TYPE *A_inp, TYPE *B_inp, TYPE *C_inp, unsigned in
 
 	start = starpu_timing_now();
 
-	unsigned x, y, ns, iter, i, j;
+	unsigned x, y, ns, iter, i, j, k;
+  printf("niter=%d nsteps=%d nslicesx=%d nslicesy=%d\n",niter, nsteps, nslicesx,nslicesy);
 	for (iter = 0; iter < niter; iter++)
 	{
 		for (ns = 0; ns < nsteps; ++ns)
@@ -352,9 +364,9 @@ int run_starpu_dgemm_hybrid_c(TYPE *A_inp, TYPE *B_inp, TYPE *C_inp, unsigned in
 
 			task->cl = &cl;
 
-			task->handles[0] = starpu_data_get_sub_data(A_handle, 1, y);
-			task->handles[1] = starpu_data_get_sub_data(B_handle, 1, x);
-			task->handles[2] = starpu_data_get_sub_data(C_handle, 2, x, y);
+			task->handles[0] = starpu_data_get_sub_data(A_handle, 1, ns*(zdim*ydim) + y);
+			task->handles[1] = starpu_data_get_sub_data(B_handle, 1, ns*(xdim*zdim) + x);
+			task->handles[2] = starpu_data_get_sub_data(C_handle, 2, ns*(xdim*ydim) + x, y);
 
 			ret = starpu_task_submit(task);
 			if (ret == -ENODEV)
