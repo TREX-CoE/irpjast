@@ -1,6 +1,7 @@
 /* Generated from qmckl_dgemm.org */
 
 #include <starpu.h>
+#include <chameleon.h>
 
 #include <stdint.h>
 #include <assert.h>
@@ -223,64 +224,28 @@ void qmckl_dgemm(char transa, char transb,
 
 void qmckl_tasks_run(struct dgemm_args** gemms, int ngemms)
 {
-  int rc = starpu_init(NULL);
-  starpu_cublas_init();
+  int NCPU, NGPU;
+  sscanf( getenv( "STARPU_NCPU" ), "%d", &NCPU );
+  sscanf( getenv( "STARPU_NCUDA" ), "%d", &NGPU );
 
-  assert (rc == 0);
-
-  starpu_data_handle_t matrix_handle[ngemms][3];
-
-  for (int i=0 ; i<ngemms ; ++i)
-    {
-      starpu_matrix_data_register(&(matrix_handle[i][0]),
-                                    STARPU_MAIN_RAM,
-                                    (uintptr_t) gemms[i]->A,
-                                    gemms[i]->lda,
-                                    gemms[i]->m,
-                                    gemms[i]->k,
-                                    sizeof(double));
-
-      starpu_matrix_data_register(&(matrix_handle[i][1]),
-                                    STARPU_MAIN_RAM,
-                                    (uintptr_t) gemms[i]->B,
-                                    gemms[i]->ldb,
-                                    gemms[i]->k,
-                                    gemms[i]->n,
-                                    sizeof(double));
-
-      starpu_matrix_data_register(&(matrix_handle[i][2]),
-                                    STARPU_MAIN_RAM,
-                                    (uintptr_t) gemms[i]->C,
-                                    gemms[i]->ldc,
-                                    gemms[i]->m,
-                                    gemms[i]->n,
-                                    sizeof(double));
-
-      struct starpu_task *task = starpu_task_create();
-
-      task->cl = &dgemm_cl;
-      task->cl_arg = gemms[i];
-      task->cl_arg_size = sizeof(*gemms[0]);
-      task->handles[0] = matrix_handle[i][0];
-      task->handles[1] = matrix_handle[i][1];
-      task->handles[2] = matrix_handle[i][2];
-      rc = starpu_task_submit(task);
-      assert (rc == 0);
-    }
-  starpu_task_wait_for_all();
+  int rc = CHAMELEON_Init(NCPU, NGPU);
 
   for (int i=0 ; i<ngemms ; ++i)
     {
-      starpu_data_unregister(matrix_handle[i][0]);
-      starpu_data_unregister(matrix_handle[i][1]);
-      starpu_data_unregister(matrix_handle[i][2]);
+      CHAMELEON_dgemm(ChamNoTrans, ChamNoTrans,
+		      gemms[i]->m,
+		      gemms[i]->n,
+		      gemms[i]->k,
+		      gemms[i]->alpha,
+		      gemms[i]->A,
+		      gemms[i]->lda,
+		      gemms[i]->B,
+		      gemms[i]->ldb,
+		      gemms[i]->beta,
+		      gemms[i]->C,
+		      gemms[i]->ldc);
     }
+  CHAMELEON_Finalize();
 
-  starpu_shutdown();
-}
-
-void alloc(void** ptr, int64_t size) {
-	printf("size: %ld\n", size);
-	starpu_malloc(ptr, (size_t) size * sizeof(double));
 }
 
