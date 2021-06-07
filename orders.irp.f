@@ -87,7 +87,7 @@ BEGIN_PROVIDER [double precision, aord_vect, (naord + 1, typenuc)]
  PROVIDE naord
  PROVIDE nbord
  PROVIDE ncord
- character(len=*), parameter :: FILE_NAME = "/home/vijay/Documents/codes/TREX/irpjast/jast_coeffs.txt"
+ character(len=*), parameter :: FILE_NAME = "/users/p18005/gopalchi/TREX/vijay_fork/irpjast/jast_coeffs.txt"
  integer :: i, fu, rc
 
  open(action='read', file=FILE_NAME, iostat=rc, newunit=fu)

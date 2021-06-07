@@ -38,6 +38,7 @@ def get_sphere_distribution(n, dmin, Ls, maxiter=1e4, allow_wall=True):
     sphere_vol = np.pi/6*dmin**3
     box_vol = np.prod(Ls + 0.5*dmin)
     fill_dens = n*sphere_vol/box_vol
+    print(fill_dens,Ls, dmin,sphere_vol)
     if fill_dens > 0.64:
         msg = f'Too many to fit in the volume, density {fill_dens:.3g}>0.64'
         raise ValueError(msg)
@@ -129,7 +130,7 @@ def getCoefList(Nord,Natom):
         for k in range(p-1,-1,-1):
             lmax = dict[k](p,k)
             for l in range(lmax,-1,-1):
-                if (p-k-l) & 1 is 0:
+                if (p-k-l) & 1 == 0:
                     count += 1
     coeflista = np.random.rand(Nord+1,Natom)
     coeflistb = np.random.rand(Nord+1)

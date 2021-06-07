@@ -28,7 +28,7 @@ def main(argv):
    Nelec = Ratio
    Nord = 5
 
-   L1 = 20.0
+   L1 = 200.0
    n = Natom # number of points
    dmin = 0.1 # min dist between points
    Ls = np.array([L1,L1,L1]) # lengths of the box
@@ -41,7 +41,7 @@ def main(argv):
 
    atomList,_,_ = get_sphere_distribution(n, dmin, Ls, maxiter=1e4, allow_wall=True)
 
-   L1 = 15.0
+   L1 = 100.0
    n = Nelec # number of points
    dmin = 0.1 # min dist between points
    Ls = np.array([L1,L1,L1]) # lengths of the box
