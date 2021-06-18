@@ -1,12 +1,16 @@
-BEGIN_PROVIDER [ double precision, factor_een ]
+ BEGIN_PROVIDER [ double precision, factor_een ]
+&BEGIN_PROVIDER [ double precision, factor_een_deriv_e, (4, nelec) ]
    implicit none
    BEGIN_DOC
    ! Electron -electron-nuclei contribution to Jastrow factor
    !
    ! 5436.20340250000
+   ! Derivative of the Jeen
+   ! 35533.115255
    END_DOC
    integer                        :: i, j, a, p, k, l, lmax, m, n
    double precision               :: cn, accu2, accu
+   double precision               :: daccu(1:4), daccu2(1:4)
 
 !   double precision :: ria_tmp(nelec,dim_cord_vect,nnuc)
 !   double precision :: rja_tmp(nelec,dim_cord_vect,nnuc)
@@ -56,17 +60,6 @@ BEGIN_PROVIDER [ double precision, factor_een ]
      enddo
 
    enddo
-
-END_PROVIDER
-
-BEGIN_PROVIDER [ double precision, factor_een_deriv_e, (4, nelec) ]
-  implicit none
-  BEGIN_DOC
-! Derivative of the Jeen
-! 35533.115255
-  END_DOC
-  integer                        :: i, j, a, p, k, l, lmax, m, n
-  double precision               :: cn, accu, accu2, daccu(1:4), daccu2(1:4)
   
 !  factor_een_deriv_e(1:4,1:nelec) = factor_een_deriv_e_blas(1:4,1:nelec)
 !  return
